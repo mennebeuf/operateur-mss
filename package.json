@@ -1,0 +1,26 @@
+{
+  "name": "mssante-operator",
+  "version": "1.0.0",
+  "description": "Plateforme Opérateur MSSanté",
+  "private": true,
+  "scripts": {
+    "install": "npm install --prefix services/api && npm install --prefix services/frontend",
+    "dev:api": "cd services/api && npm run dev",
+    "dev:frontend": "cd services/frontend && npm start",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:frontend\"",
+    "build:api": "cd services/api && npm run build",
+    "build:frontend": "cd services/frontend && npm run build",
+    "build": "npm run build:api && npm run build:frontend",
+    "test": "npm test --prefix services/api && npm test --prefix services/frontend",
+    "lint": "npm run lint --prefix services/api && npm run lint --prefix services/frontend",
+    "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:build": "docker-compose build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "prettier": "^3.0.0"
+  }
+}

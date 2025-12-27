@@ -1,0 +1,62 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start All Services",
+      "type": "shell",
+      "command": "docker-compose up -d",
+      "problemMatcher": []
+    },
+    {
+      "label": "Stop All Services",
+      "type": "shell",
+      "command": "docker-compose down",
+      "problemMatcher": []
+    },
+    {
+      "label": "Rebuild Services",
+      "type": "shell",
+      "command": "docker-compose up -d --build",
+      "problemMatcher": []
+    },
+    {
+      "label": "View Logs",
+      "type": "shell",
+      "command": "docker-compose logs -f",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run API Tests",
+      "type": "npm",
+      "script": "test",
+      "path": "services/api/",
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "Lint API",
+      "type": "npm",
+      "script": "lint",
+      "path": "services/api/",
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "Lint Frontend",
+      "type": "npm",
+      "script": "lint",
+      "path": "services/frontend/",
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "Database Migration",
+      "type": "shell",
+      "command": "./scripts/db-migrate.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backup Database",
+      "type": "shell",
+      "command": "./scripts/backup/backup.sh",
+      "problemMatcher": []
+    }
+  ]
+}

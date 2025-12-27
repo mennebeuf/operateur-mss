@@ -1,0 +1,42 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.workingDirectories": [
+    "./services/api",
+    "./services/frontend"
+  ],
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.DS_Store": true,
+    "**/data": true,
+    "**/.env": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/data": true,
+    "**/.git": true
+  },
+  "files.associations": {
+    "*.cf": "properties",
+    "docker-compose*.yml": "yaml"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  },
+  "prettier.configPath": "./services/frontend/.prettierrc",
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "docker.containers.label": "ContainerName",
+  "docker.containers.groupBy": "Compose Project Name"
+}
