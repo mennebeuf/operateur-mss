@@ -1147,3 +1147,11 @@ Après l'installation réussie :
 8. ✅ Migration vers la production
 
 Consultez le [guide de configuration](configuration.md) pour les étapes suivantes.
+
+---
+
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

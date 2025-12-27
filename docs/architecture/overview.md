@@ -764,6 +764,8 @@ Cette architecture permet de :
 
 ---
 
-**Dernière mise à jour :** Décembre 2025  
-**Version du document :** 1.0  
-**Auteur :** Équipe Architecture
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

@@ -1552,3 +1552,11 @@ En cas de problème pendant un déploiement, contactez:
 - Email: ops@votre-domaine.fr
 - Slack: #mssante-ops
 - Téléphone d'astreinte: +33 X XX XX XX XX
+
+---
+
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

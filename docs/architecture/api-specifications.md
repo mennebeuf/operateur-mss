@@ -819,4 +819,8 @@ POST /api/v1/webhooks
 
 ---
 
-Cette spécification API fournit une base complète pour l'implémentation de l'API REST de votre opérateur MSSanté.
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

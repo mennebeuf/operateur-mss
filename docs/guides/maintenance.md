@@ -496,3 +496,11 @@ Activer le mode verbose pour plus de détails :
 - [Guide de configuration](configuration.md)
 - [Troubleshooting](troubleshooting.md)
 - [Backup et restauration](../admin/backup-restore.md)
+
+---
+
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

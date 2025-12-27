@@ -18,6 +18,7 @@
 ## Diagnostic général
 
 ### Vérification rapide de l'état du système
+
 ```bash
 #!/bin/bash
 # scripts/diagnostic/quick-check.sh
@@ -67,6 +68,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ### Vérification des logs
+
 ```bash
 # Tous les logs en temps réel
 docker compose logs -f
@@ -95,16 +97,19 @@ docker compose logs api | grep "WARN"
 ### Problème 1: Les conteneurs ne démarrent pas
 
 **Symptômes:**
+
 ```
 Error response from daemon: driver failed programming external connectivity
 ```
 
 **Causes possibles:**
+
 - Ports déjà utilisés par d'autres applications
 - Firewall bloquant les ports
 - Conflits de réseau Docker
 
 **Solution:**
+
 ```bash
 # 1. Vérifier les ports en écoute
 sudo netstat -tulpn | grep -E ':(80|443|25|587|143|3000|5432|6379)'
@@ -131,11 +136,13 @@ docker compose up -d
 ### Problème 2: Erreur "Cannot connect to Docker daemon"
 
 **Symptômes:**
+
 ```
 Cannot connect to the Docker daemon at unix:///var/run/docker.sock
 ```
 
 **Solution:**
+
 ```bash
 # 1. Vérifier que Docker est démarré
 sudo systemctl status docker
@@ -156,11 +163,13 @@ docker ps
 ### Problème 3: Erreur "no space left on device"
 
 **Symptômes:**
+
 ```
 Error: failed to register layer: Error processing tar file: write /...: no space left on device
 ```
 
 **Solution:**
+
 ```bash
 # 1. Vérifier l'espace disque
 df -h
@@ -183,6 +192,7 @@ docker images | grep "<none>" | awk '{print $3}' | xargs docker rmi
 ### Problème 4: Conteneur redémarre en boucle
 
 **Symptômes:**
+
 ```
 docker compose ps
 NAME    STATUS
@@ -190,6 +200,7 @@ api     Restarting (1) 2 seconds ago
 ```
 
 **Diagnostic:**
+
 ```bash
 # 1. Voir les logs du conteneur
 docker compose logs --tail=50 api
@@ -205,6 +216,7 @@ docker compose run --rm api sh
 ```
 
 **Solutions courantes:**
+
 ```bash
 # Si erreur de configuration
 # Vérifier le fichier .env
@@ -228,11 +240,13 @@ docker compose up -d api
 ### Problème 1: "Connection refused" PostgreSQL
 
 **Symptômes:**
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:5432
 ```
 
 **Solution:**
+
 ```bash
 # 1. Vérifier que PostgreSQL est démarré
 docker compose ps postgres
@@ -256,11 +270,13 @@ docker compose restart postgres
 ### Problème 2: "Too many connections" PostgreSQL
 
 **Symptômes:**
+
 ```
 FATAL: sorry, too many clients already
 ```
 
 **Solution:**
+
 ```bash
 # 1. Voir les connexions actives
 docker compose exec postgres psql -U mssante -d mssante -c "
@@ -292,11 +308,13 @@ docker compose restart postgres
 ### Problème 3: Base de données corrompue
 
 **Symptômes:**
+
 ```
 ERROR: could not read block X in file "base/...": read only 0 of 8192 bytes
 ```
 
 **Solution:**
+
 ```bash
 # 1. BACKUP IMMÉDIAT si possible
 docker compose exec postgres pg_dumpall -U mssante > backup_emergency.sql
@@ -326,11 +344,13 @@ cat backup_emergency.sql | docker compose exec -T postgres psql -U mssante
 ### Problème 4: Migrations échouées
 
 **Symptômes:**
+
 ```
 Error: Migration "001_schema.sql" failed
 ```
 
 **Solution:**
+
 ```bash
 # 1. Vérifier l'état des migrations
 docker compose exec postgres psql -U mssante -d mssante -c "
@@ -366,12 +386,14 @@ docker compose exec api npm run seed
 ### Problème 1: Pro Santé Connect ne fonctionne pas
 
 **Symptômes:**
+
 ```
 Error: invalid_client
 Error: redirect_uri_mismatch
 ```
 
 **Solution:**
+
 ```bash
 # 1. Vérifier la configuration PSC dans .env
 cat .env | grep PSC
@@ -397,6 +419,7 @@ docker compose logs api | grep -i psc
 ### Problème 2: JWT Token invalide
 
 **Symptômes:**
+
 ```
 401 Unauthorized
 Error: jwt malformed
@@ -404,6 +427,7 @@ Error: jwt expired
 ```
 
 **Solution:**
+
 ```bash
 # 1. Vérifier la clé JWT_SECRET dans .env
 cat .env | grep JWT_SECRET
@@ -1181,3 +1205,11 @@ Si les solutions de ce guide ne résolvent pas votre problème :
 ---
 
 Ce guide couvre les problèmes les plus courants. Pour des cas spécifiques ou des erreurs non documentées, n'hésitez pas à consulter la documentation complète ou à contacter le support.
+
+---
+
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

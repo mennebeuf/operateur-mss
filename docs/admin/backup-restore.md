@@ -576,5 +576,8 @@ tail -f /data/backups/restore.log
 
 ---
 
-**Dernière mise à jour :** Décembre 2024  
-**Version :** 1.0
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

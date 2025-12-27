@@ -526,6 +526,6 @@ Les logs sont disponibles dans :
 
 ## Historique des modifications
 
-| Date | Version | Auteur | Description |
-|------|---------|--------|-------------|
-| 2025-01-XX | 1.0.0 | - | Création initiale |
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

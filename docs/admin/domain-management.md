@@ -867,3 +867,9 @@ curl -X POST https://api.votre-operateur.mssante.fr/api/v1/admin/domains/merge \
    - Offrir un support dédié
 
 ---
+
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

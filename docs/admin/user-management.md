@@ -1058,3 +1058,9 @@ curl -X POST https://api.votre-domaine.mssante.fr/api/v1/admin/users/USER_ID/res
    - Offrir un support accessible
 
 ---
+
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |

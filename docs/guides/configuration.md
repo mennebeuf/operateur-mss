@@ -1141,4 +1141,8 @@ server {
 
 ---
 
-Ce guide de configuration couvre tous les aspects techniques nécessaires pour configurer correctement votre plateforme MSSanté. Consultez le [guide de déploiement](deployment.md) pour la mise en production.
+## Historique des modifications
+
+| Date       | Version    | Auteur            | Description       |
+|------------|------------|-------------------|-------------------|
+| 2025-12-28 | 1.0.0      | Antoine MENNEBEUF | Création initiale |
