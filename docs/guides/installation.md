@@ -9,7 +9,8 @@
 5. [Déploiement avec Docker](#déploiement-avec-docker)
 6. [Configuration des services](#configuration-des-services)
 7. [Vérification de l'installation](#vérification-de-linstallation)
-8. [Dépannage](#dépannage)
+8. [Scripts de Setup](#scripts-de-setup)
+9. [Dépannage](#dépannage)
 
 ---
 
@@ -18,12 +19,14 @@
 ### Matériel recommandé
 
 #### Environnement de développement
+
 - **CPU:** 4 cores minimum
 - **RAM:** 8 GB minimum
 - **Disque:** 50 GB SSD
 - **Réseau:** 10 Mbps
 
 #### Environnement de production
+
 - **CPU:** 8+ cores (16 recommandé)
 - **RAM:** 16+ GB (32 GB recommandé)
 - **Disque:** 200+ GB SSD (RAID 10 recommandé)
@@ -33,12 +36,14 @@
 ### Système d'exploitation
 
 **Systèmes supportés:**
+
 - Ubuntu Server 22.04 LTS (recommandé)
 - Debian 12
 - Rocky Linux 9
 - CentOS Stream 9
 
 **Configuration minimale:**
+
 - Kernel Linux 5.15+
 - Système à jour (security patches)
 
@@ -178,6 +183,7 @@ dig votre-domaine.mssante.fr TXT +short
 ## Installation des dépendances
 
 ### 1. Cloner le dépôt
+
 ```bash
 # Créer le répertoire de travail
 mkdir -p ~/mssante-operator
@@ -191,6 +197,7 @@ ls -la
 ```
 
 ### 2. Créer la structure des répertoires
+
 ```bash
 # Création des répertoires de données
 mkdir -p data/{postgres,redis,mail,logs,backups,prometheus,grafana}
@@ -208,6 +215,7 @@ tree -L 2 config/
 ```
 
 ### 3. Installation des outils complémentaires
+
 ```bash
 # Ubuntu/Debian
 sudo apt install -y \
@@ -239,6 +247,7 @@ sudo dnf install -y \
 ### 1. Variables d'environnement
 
 **Copier le fichier d'exemple:**
+
 ```bash
 cp .env.example .env
 ```
@@ -394,6 +403,7 @@ openssl rsa -in config/certificates/server/server.key -check
 ## Déploiement avec Docker
 
 ### 1. Construction des images
+
 ```bash
 # Construire toutes les images
 docker compose build --no-cache
@@ -406,6 +416,7 @@ docker compose build frontend
 ### 2. Initialisation de la base de données
 
 **Démarrer PostgreSQL seul:**
+
 ```bash
 docker compose up -d postgres
 
@@ -414,6 +425,7 @@ docker compose exec postgres pg_isready -U mssante
 ```
 
 **Exécuter les migrations:**
+
 ```bash
 # Script d'initialisation
 ./scripts/init-db.sh
@@ -424,6 +436,7 @@ docker compose exec postgres psql -U mssante -d mssante -f /docker-entrypoint-in
 ```
 
 **Vérifier la base:**
+
 ```bash
 # Se connecter à PostgreSQL
 docker compose exec postgres psql -U mssante -d mssante
@@ -658,6 +671,331 @@ docker compose logs --tail=100 api
 # Logs dans les fichiers
 tail -f data/logs/api/app.log
 tail -f data/logs/postfix/mail.log
+```
+
+---
+
+## Scripts de Setup
+
+Le projet fournit deux scripts automatisés pour simplifier l'installation et la configuration initiale. Ces scripts se trouvent dans le répertoire `scripts/setup/`.
+
+---
+
+### install-deps.sh
+
+**Chemin:** `scripts/setup/install-deps.sh`
+
+**Description:** Installe toutes les dépendances système et applicatives nécessaires au fonctionnement de la plateforme MSSanté.
+
+#### Fonctionnalités
+
+| Composant | Description |
+|-----------|-------------|
+| **Outils système** | curl, wget, git, jq, vim, htop, tree, openssl, net-tools |
+| **Clients DB** | postgresql-client, redis-tools |
+| **Docker** | Docker Engine + Docker Compose V2 |
+| **Node.js** | Node.js 20.x via NodeSource + npm |
+| **Outils npm globaux** | pm2, nodemon, typescript, eslint, prettier |
+| **Sécurité** | Firewall (UFW/firewalld), Fail2ban |
+
+#### Systèmes supportés
+
+- Ubuntu 22.04+
+- Debian 12+
+- Rocky Linux 9+
+- CentOS Stream 9+
+
+#### Utilisation
+
+```bash
+# Rendre le script exécutable
+chmod +x scripts/setup/install-deps.sh
+
+# Installation complète (mode interactif)
+./scripts/setup/install-deps.sh
+
+# Installation non-interactive (CI/CD)
+./scripts/setup/install-deps.sh -y
+
+# Installation sans Docker
+./scripts/setup/install-deps.sh --no-docker
+
+# Installation sans mise à jour système
+./scripts/setup/install-deps.sh --skip-update
+
+# Avec une version spécifique de Node.js
+./scripts/setup/install-deps.sh --node-version 18
+```
+
+#### Options disponibles
+
+| Option | Description |
+|--------|-------------|
+| `--no-docker` | Ne pas installer Docker |
+| `--no-node` | Ne pas installer Node.js |
+| `--no-tools` | Ne pas installer les outils système |
+| `--no-npm` | Ne pas installer les dépendances npm du projet |
+| `--skip-update` | Ne pas mettre à jour le système |
+| `--node-version VER` | Spécifier la version de Node.js (défaut: 20) |
+| `-y, --yes` | Mode non-interactif (accepter tout) |
+| `-h, --help` | Afficher l'aide |
+
+#### Ce que fait le script
+
+1. **Détection du système** : Identifie automatiquement la distribution Linux
+2. **Mise à jour système** : Met à jour les paquets (optionnel)
+3. **Installation des outils** : Installe les dépendances système
+4. **Installation Docker** : Installe Docker via le script officiel
+5. **Installation Node.js** : Installe Node.js via NodeSource
+6. **Dépendances npm** : Installe les dépendances du projet
+7. **Configuration firewall** : Configure UFW ou firewalld
+8. **Configuration Fail2ban** : Protège SSH, Postfix, Dovecot
+9. **Vérification** : Affiche un récapitulatif des installations
+
+#### Exemple de sortie
+
+```
+╔════════════════════════════════════════════════════════════╗
+║   🏥 MSSANTÉ OPÉRATEUR - Installation des dépendances     ║
+╚════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Détection du système d'exploitation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Système détecté: ubuntu 22.04
+ℹ️  Gestionnaire de paquets: apt
+
+┌─────────────────────────────────────────────────────────────┐
+│                   RÉCAPITULATIF                            │
+├─────────────────────────────────────────────────────────────┤
+│  Docker               │  24.0.7         │  ✅              │
+│  Docker Compose       │  2.24.0         │  ✅              │
+│  Node.js              │  20.10.0        │  ✅              │
+│  npm                  │  10.2.5         │  ✅              │
+│  Git                  │  2.43.0         │  ✅              │
+│  OpenSSL              │  3.0.2          │  ✅              │
+└─────────────────────────────────────────────────────────────┘
+
+✅ Installation des dépendances terminée!
+```
+
+---
+
+### setup-env.sh
+
+**Chemin:** `scripts/setup/setup-env.sh`
+
+**Description:** Configure l'environnement de travail en créant la structure des répertoires, générant le fichier `.env` avec des secrets sécurisés, et préparant les fichiers de configuration.
+
+#### Fonctionnalités
+
+| Composant | Description |
+|-----------|-------------|
+| **Vérification prérequis** | Docker, Docker Compose, OpenSSL, Git, curl |
+| **Structure répertoires** | Crée `data/`, `config/`, et sous-répertoires |
+| **Fichier .env** | Génère automatiquement avec secrets sécurisés |
+| **Configuration services** | Prépare les fichiers de config Traefik, API, Frontend |
+| **Certificats dev** | Génère des certificats auto-signés (mode développement) |
+
+#### Environnements supportés
+
+- `development` : Environnement de développement local
+- `staging` : Environnement de pré-production
+- `production` : Environnement de production
+
+#### Utilisation
+
+```bash
+# Rendre le script exécutable
+chmod +x scripts/setup/setup-env.sh
+
+# Configuration pour le développement (défaut)
+./scripts/setup/setup-env.sh
+
+# Configuration pour staging
+./scripts/setup/setup-env.sh staging
+
+# Configuration pour production
+./scripts/setup/setup-env.sh production
+
+# Forcer l'écrasement des fichiers existants
+./scripts/setup/setup-env.sh -f production
+
+# Mode non-interactif
+./scripts/setup/setup-env.sh -n development
+```
+
+#### Options disponibles
+
+| Option | Description |
+|--------|-------------|
+| `-f, --force` | Écraser les fichiers existants sans confirmation |
+| `-n, --non-interactive` | Mode non-interactif |
+| `-h, --help` | Afficher l'aide |
+
+#### Ce que fait le script
+
+1. **Vérification des prérequis** : S'assure que tous les outils nécessaires sont installés
+2. **Création des répertoires** :
+   ```
+   data/
+   ├── postgres/
+   ├── redis/
+   ├── mail/
+   ├── logs/
+   ├── backups/
+   ├── prometheus/
+   └── grafana/
+   
+   config/
+   ├── certificates/
+   │   ├── igc-sante/
+   │   ├── server/
+   │   └── domains/
+   ├── traefik/
+   ├── postfix/
+   ├── dovecot/
+   └── postgres/
+   ```
+3. **Génération du fichier .env** avec secrets automatiques :
+   - Mot de passe PostgreSQL (32 caractères)
+   - Mot de passe Redis (32 caractères)
+   - Secret JWT (64 caractères base64)
+   - Mot de passe Grafana (24 caractères)
+4. **Configuration des services** : Copie les templates de configuration
+5. **Certificats de développement** : Génère des certificats auto-signés (mode dev uniquement)
+
+#### Variables générées automatiquement
+
+Le script génère automatiquement des valeurs sécurisées pour :
+
+| Variable | Description | Longueur |
+|----------|-------------|----------|
+| `POSTGRES_PASSWORD` | Mot de passe PostgreSQL | 32 caractères |
+| `REDIS_PASSWORD` | Mot de passe Redis | 32 caractères |
+| `JWT_SECRET` | Clé secrète JWT | 64 caractères (base64) |
+| `GRAFANA_ADMIN_PASSWORD` | Mot de passe admin Grafana | 24 caractères |
+| `SESSION_SECRET` | Secret de session | 48 caractères (base64) |
+
+#### Variables à configurer manuellement
+
+Après exécution du script, vous devez éditer `.env` pour configurer :
+
+```bash
+# Domaine MSSanté (obligatoire)
+DOMAIN=votre-operateur.mssante.fr
+
+# Pro Santé Connect (obligatoire)
+PSC_CLIENT_ID=votre_client_id_psc
+PSC_CLIENT_SECRET=votre_client_secret_psc
+
+# ANS / Opérateur (obligatoire)
+OPERATOR_ID=VOTRE_ID_OPERATEUR_ANS
+ANNUAIRE_API_KEY=votre_cle_api_annuaire
+
+# FINESS (obligatoire)
+FINESS_JURIDIQUE=750000001
+FINESS_GEOGRAPHIQUE=750000002
+```
+
+#### Exemple de sortie
+
+```
+╔════════════════════════════════════════════════════════════╗
+║   🏥 MSSANTÉ OPÉRATEUR - Configuration Environnement      ║
+╚════════════════════════════════════════════════════════════╝
+
+  Environnement: development
+  Date: 2024-03-20 14:30:00
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Vérification des prérequis
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Docker 24.0.7
+✅ Docker Compose 2.24.0
+✅ OpenSSL 3.0.2
+✅ Git 2.43.0
+✅ curl 7.81.0
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Création de la structure des répertoires
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ℹ️  Créé: data/postgres
+ℹ️  Créé: data/redis
+...
+✅ Structure des répertoires créée
+
+✅ Configuration terminée!
+```
+
+---
+
+### Workflow d'installation recommandé
+
+Pour une nouvelle installation, suivez cet ordre :
+
+```bash
+# 1. Cloner le projet
+git clone https://github.com/votre-org/mssante-operator.git
+cd mssante-operator
+
+# 2. Installer les dépendances système
+./scripts/setup/install-deps.sh
+
+# 3. Se reconnecter pour appliquer le groupe docker
+# (ou exécuter: newgrp docker)
+
+# 4. Configurer l'environnement
+./scripts/setup/setup-env.sh
+
+# 5. Éditer le fichier .env avec vos paramètres
+nano .env
+
+# 6. Démarrer les services
+docker compose up -d
+
+# 7. Vérifier le bon fonctionnement
+docker compose ps
+curl http://localhost:3000/health
+```
+
+### Dépannage des scripts
+
+#### Erreur de permissions
+
+```bash
+# Si le script n'est pas exécutable
+chmod +x scripts/setup/install-deps.sh
+chmod +x scripts/setup/setup-env.sh
+```
+
+#### Erreur Docker après installation
+
+```bash
+# Appliquer le groupe docker sans se déconnecter
+newgrp docker
+
+# Ou se déconnecter/reconnecter
+exit
+# Se reconnecter...
+```
+
+#### Réinitialiser la configuration
+
+```bash
+# Sauvegarder l'ancien .env
+mv .env .env.backup
+
+# Régénérer
+./scripts/setup/setup-env.sh -f
+```
+
+#### Mode debug
+
+```bash
+# Exécuter avec trace bash
+bash -x ./scripts/setup/install-deps.sh
+bash -x ./scripts/setup/setup-env.sh
 ```
 
 ---
