@@ -5,13 +5,14 @@
 1. [Prérequis au déploiement](#prérequis-au-déploiement)
 2. [Environnements](#environnements)
 3. [Checklist pré-déploiement](#checklist-pré-déploiement)
-4. [Déploiement en environnement de test](#déploiement-en-environnement-de-test)
-5. [Déploiement en production](#déploiement-en-production)
-6. [Stratégies de déploiement](#stratégies-de-déploiement)
-7. [Validation post-déploiement](#validation-post-déploiement)
-8. [Rollback et récupération](#rollback-et-récupération)
-9. [Monitoring continu](#monitoring-continu)
-10. [Maintenance et mises à jour](#maintenance-et-mises-à-jour)
+4. [Scripts de déploiement](#scripts-de-déploiement)
+5. [Déploiement en environnement de test](#déploiement-en-environnement-de-test)
+6. [Déploiement en production](#déploiement-en-production)
+7. [Stratégies de déploiement](#stratégies-de-déploiement)
+8. [Validation post-déploiement](#validation-post-déploiement)
+9. [Rollback et récupération](#rollback-et-récupération)
+10. [Monitoring continu](#monitoring-continu)
+11. [Maintenance et mises à jour](#maintenance-et-mises-à-jour)
 
 ---
 
@@ -163,6 +164,359 @@ netstat -tulpn | grep -E ':(80|443|25|587|143)'
 - [ ] Équipe de support prévenue
 - [ ] Fenêtre de maintenance communiquée
 - [ ] Plan de communication préparé
+
+---
+
+## Scripts de déploiement
+
+> **À insérer après la section "Checklist pré-déploiement" et avant "Déploiement en environnement de test"**
+
+Le projet fournit trois scripts de déploiement dans `scripts/deploy/` :
+
+| Script | Description | Environnement |
+|--------|-------------|---------------|
+| `deploy.sh` | Déploiement générique | dev, staging, production |
+| `deploy-production.sh` | Déploiement sécurisé avec backup | production |
+| `rollback.sh` | Retour à une version antérieure | tous |
+
+### Installation
+
+```bash
+# Rendre les scripts exécutables
+chmod +x scripts/deploy/deploy.sh
+chmod +x scripts/deploy/deploy-production.sh
+chmod +x scripts/deploy/rollback.sh
+```
+
+---
+
+### deploy.sh - Déploiement générique
+
+Script polyvalent pour tous les environnements.
+
+#### Usage
+
+```bash
+./scripts/deploy/deploy.sh [environnement]
+```
+
+#### Paramètres
+
+| Paramètre | Description | Valeurs possibles | Défaut |
+|-----------|-------------|-------------------|--------|
+| `environnement` | Environnement cible | `dev`, `staging`, `production` | `dev` |
+
+#### Exemples
+
+```bash
+# Déploiement développement
+./scripts/deploy/deploy.sh dev
+
+# Déploiement staging
+./scripts/deploy/deploy.sh staging
+
+# Déploiement production (préférer deploy-production.sh)
+./scripts/deploy/deploy.sh production
+```
+
+#### Étapes exécutées
+
+1. Validation de l'environnement
+2. Vérifications préalables (Docker, Git, .env)
+3. Pull du code (sauf en dev)
+4. Build des images Docker
+5. Arrêt des services actuels
+6. Démarrage des nouveaux services
+7. Exécution des migrations
+8. Health checks
+9. Tests de fumée
+10. Nettoyage
+
+#### Comportement par environnement
+
+| Aspect | dev | staging | production |
+|--------|-----|---------|------------|
+| Git pull | Non | Oui | Oui |
+| Build cache | Oui | Oui | Non |
+| Vérif. commits | Non | Oui | Oui |
+
+---
+
+### deploy-production.sh - Déploiement production
+
+Script sécurisé avec backup automatique et rollback en cas d'échec.
+
+#### Usage
+
+```bash
+./scripts/deploy/deploy-production.sh
+```
+
+> ⚠️ **Ce script ne prend aucun paramètre** - il est exclusivement destiné à la production.
+
+#### Prérequis
+
+- `NODE_ENV=production` dans le fichier `.env`
+- Certificats SSL valides (expiration > 7 jours)
+- Espace disque disponible > 10 GB
+- Aucun changement Git non commité
+
+#### Sécurités intégrées
+
+| Sécurité | Description |
+|----------|-------------|
+| **Confirmation** | Requiert de taper `DEPLOY` pour continuer |
+| **Backup automatique** | PostgreSQL, Redis, configurations sauvegardés |
+| **Mode maintenance** | Activé automatiquement pendant le déploiement |
+| **Rollback automatique** | Déclenché en cas d'échec à n'importe quelle étape |
+| **Vérification SSL** | Alerte si certificat expire dans < 30 jours |
+
+#### Étapes détaillées
+
+```
+ 1. Vérifications préalables
+    ├── Permissions utilisateur
+    ├── Fichier .env présent
+    ├── NODE_ENV = production
+    ├── Validité certificats SSL
+    ├── Espace disque suffisant
+    └── Pas de changements Git non commités
+
+ 2. Confirmation interactive (taper "DEPLOY")
+
+ 3. Backup pré-déploiement
+    ├── PostgreSQL → database.sql.gz
+    ├── Redis → redis.rdb
+    └── Configurations → config.tar.gz
+
+ 4. Activation mode maintenance
+
+ 5. Arrêt des services (docker compose down)
+
+ 6. Mise à jour du code (git pull)
+
+ 7. Build des images (--no-cache)
+
+ 8. Démarrage des services
+
+ 9. Exécution des migrations
+
+10. Tests de fumée
+    ├── API health check
+    ├── SMTP (port 587)
+    ├── IMAP (port 143)
+    ├── PostgreSQL
+    └── Redis
+
+11. Désactivation mode maintenance
+
+12. Nettoyage et génération rapport
+```
+
+#### Structure des backups
+
+Les backups sont créés dans `/backup/deployments/[YYYYMMDD_HHMMSS]/` :
+
+```
+/backup/deployments/20250315_143022/
+├── database.sql.gz       # Dump PostgreSQL compressé
+├── redis.rdb             # Snapshot Redis
+├── config.tar.gz         # Fichiers de configuration
+├── version.txt           # Tag ou commit de la version
+├── git-commit.txt        # Hash complet du commit
+└── deployment-info.json  # Métadonnées du déploiement
+```
+
+#### Format du rapport (deployment-info.json)
+
+```json
+{
+  "version": "v1.2.3",
+  "date": "2025-03-15T14:30:22+01:00",
+  "deployed_by": "admin",
+  "hostname": "prod-server-01",
+  "git_commit": "a1b2c3d4e5f6g7h8i9j0",
+  "git_branch": "main",
+  "backup_path": "/backup/deployments/20250315_143022",
+  "status": "success"
+}
+```
+
+---
+
+### rollback.sh - Retour version précédente
+
+Script pour revenir rapidement à une version antérieure.
+
+#### Usage
+
+```bash
+# Rollback vers la dernière version stable (tag précédent)
+./scripts/deploy/rollback.sh
+
+# Rollback vers une version spécifique
+./scripts/deploy/rollback.sh v1.2.3
+
+# Lister les backups disponibles
+./scripts/deploy/rollback.sh --list
+
+# Rollback d'un service spécifique uniquement
+./scripts/deploy/rollback.sh --service api v1.2.3
+
+# Rollback sans confirmation (automatisation)
+./scripts/deploy/rollback.sh --force v1.2.3
+```
+
+#### Options
+
+| Option | Description |
+|--------|-------------|
+| `-h, --help` | Afficher l'aide |
+| `-l, --list` | Lister les backups disponibles |
+| `-f, --force` | Ne pas demander de confirmation |
+| `--service <nom>` | Rollback d'un seul service |
+
+#### Exemple de sortie --list
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 BACKUPS DISPONIBLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+DATE                 VERSION         TAILLE     STATUT
+────────────────────────────────────────────────────────
+20250315_143022      v1.2.3          245M       ✅ Complet
+20250314_092015      v1.2.2          238M       ✅ Complet
+20250310_161530      v1.2.1          230M       ✅ Complet
+20250305_080000      v1.2.0          225M       ⚠️ Partiel
+
+Dernières versions Git:
+  • v1.2.3
+  • v1.2.2
+  • v1.2.1
+```
+
+#### Étapes du rollback complet
+
+1. Confirmation (sauf si `--force`)
+2. Recherche du backup correspondant à la version
+3. Activation du mode maintenance
+4. Arrêt des services
+5. Restauration du code via `git checkout`
+6. Restauration de la base de données (si backup disponible)
+7. Restauration de Redis (si backup disponible)
+8. Rebuild des images Docker
+9. Redémarrage des services
+10. Désactivation du mode maintenance
+11. Tests de validation
+
+#### Rollback automatique
+
+Le script `deploy-production.sh` appelle automatiquement `rollback.sh` en cas d'échec :
+
+```bash
+# Variable d'environnement utilisée pour le rollback automatique
+ROLLBACK_AUTO=true ./scripts/deploy/rollback.sh
+```
+
+Dans ce mode, aucune confirmation n'est demandée.
+
+---
+
+### Intégration avec le Makefile
+
+Les scripts sont également accessibles via le Makefile :
+
+```bash
+# Déploiement développement
+make deploy-dev
+
+# Déploiement production
+make deploy-prod
+
+# Vérifier la santé des services
+make health
+```
+
+---
+
+### Variables d'environnement
+
+Les scripts utilisent les variables suivantes :
+
+| Variable | Description | Défaut |
+|----------|-------------|--------|
+| `BACKUP_DIR` | Répertoire des backups | `/backup/deployments` |
+| `NODE_ENV` | Environnement d'exécution | - |
+| `LOG_FILE` | Fichier de log du déploiement | `/var/log/mssante/deploy-*.log` |
+
+---
+
+### Logs de déploiement
+
+Les logs sont disponibles dans :
+
+```bash
+# Logs de déploiement
+/var/log/mssante/deploy-YYYYMMDD_HHMMSS.log
+
+# Logs de rollback
+/var/log/mssante/rollback-YYYYMMDD_HHMMSS.log
+
+# Consulter le dernier déploiement
+cat /var/log/mssante/deploy-*.log | tail -100
+```
+
+---
+
+### Dépannage des scripts
+
+#### Erreur : "NODE_ENV doit être 'production'"
+
+```bash
+# Vérifier la variable
+grep NODE_ENV .env
+
+# Corriger
+sed -i 's/NODE_ENV=.*/NODE_ENV=production/' .env
+```
+
+#### Erreur : "Espace disque insuffisant"
+
+```bash
+# Vérifier l'espace
+df -h
+
+# Nettoyer Docker
+docker system prune -a -f
+
+# Supprimer anciens backups
+find /backup/deployments -maxdepth 1 -type d -mtime +7 -exec rm -rf {} \;
+```
+
+#### Erreur : "Health check échoué"
+
+```bash
+# Vérifier les logs du service
+docker compose logs api --tail 50
+
+# Vérifier manuellement
+curl -v http://localhost:3000/health
+
+# Redémarrer le service
+docker compose restart api
+```
+
+#### Le rollback automatique ne fonctionne pas
+
+```bash
+# Vérifier que le script est exécutable
+ls -la scripts/deploy/rollback.sh
+
+# Exécuter manuellement
+./scripts/deploy/rollback.sh --list
+./scripts/deploy/rollback.sh v1.2.2
+```
 
 ---
 
