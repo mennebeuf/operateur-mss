@@ -88,7 +88,10 @@ mssante-operator/
 │   │   │   │   ├── annuaireBatch.js
 │   │   │   │   ├── generateIndicators.js
 │   │   │   │   ├── downloadReports.js
-│   │   │   │   └── certificateMonitor.js
+│   │   │   │   ├── certificateMonitor.js
+│   │   │   │   ├── cleanupSessions.js
+│   │   │   │   ├── dailyStatistics.js
+│   │   │   │   └── index.js
 │   │   │   ├── utils/
 │   │   │   │   ├── logger.js
 │   │   │   │   ├── smtp.js
