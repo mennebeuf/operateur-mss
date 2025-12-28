@@ -58,7 +58,8 @@ mssante-operator/
 │   │   │   │   ├── User.js
 │   │   │   │   ├── Mailbox.js
 │   │   │   │   ├── Domain.js
-│   │   │   │   └── Certificate.js
+│   │   │   │   ├── Certificate.js
+│   │   │   │   └── index.js
 │   │   │   ├── routes/
 │   │   │   │   ├── auth.js
 │   │   │   │   ├── mailboxes.js
