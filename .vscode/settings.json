@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "eslint.workingDirectories": [
     "./services/api",
@@ -38,5 +38,6 @@
   "prettier.configPath": "./services/frontend/.prettierrc",
   "terminal.integrated.defaultProfile.linux": "bash",
   "docker.containers.label": "ContainerName",
-  "docker.containers.groupBy": "Compose Project Name"
+  "docker.containers.groupBy": "Compose Project Name",
+  "containers.containers.groupBy": "Compose Project Name"
 }

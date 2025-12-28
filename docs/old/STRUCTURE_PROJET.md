@@ -36,30 +36,31 @@ mssante-operator/
 │   │
 │   ├── api/                          # Backend API Node.js
 │   │   ├── src/
-│   │   │   ├── config/
-│   │   │   │   ├── database.js
-│   │   │   │   ├── redis.js
-│   │   │   │   └── psc.js
-│   │   │   ├── controllers/
-│   │   │   │   ├── authController.js
-│   │   │   │   ├── mailboxController.js
-│   │   │   │   ├── userController.js
-│   │   │   │   └── domainController.js
-│   │   │   ├── middleware/
-│   │   │   │   ├── auth.js
-│   │   │   │   ├── permissions.js
-│   │   │   │   ├── domainContext.js
-│   │   │   │   ├── validation.js
-│   │   │   │   ├── quota.js
-│   │   │   │   ├── requestLogger.js
-│   │   │   │   ├── audit.js
-│   │   │   │   └── errorHandler.js
-│   │   │   ├── models/
-│   │   │   │   ├── User.js
-│   │   │   │   ├── Mailbox.js
-│   │   │   │   ├── Domain.js
-│   │   │   │   ├── Certificate.js
-│   │   │   │   └── index.js
+│   │   │   ├── config/  ✅
+│   │   │   │   ├── database.js ✅
+│   │   │   │   ├── redis.js ✅
+│   │   │   │   └── psc.js ✅
+│   │   │   ├── controllers/ ✅
+│   │   │   │   ├── authController.js ✅
+│   │   │   │   ├── mailboxController.js ✅
+│   │   │   │   ├── userController.js ✅
+│   │   │   │   └── domainController.js ✅
+│   │   │   ├── middleware/ ✅
+│   │   │   │   ├── auth.js ✅
+│   │   │   │   ├── permissions.js ✅
+│   │   │   │   ├── domainContext.js ✅
+│   │   │   │   ├── validation.js ✅
+│   │   │   │   ├── quota.js ✅
+│   │   │   │   ├── requestLogger.js ✅
+│   │   │   │   ├── audit.js ✅
+│   │   │   │   └── errorHandler.js ✅
+│   │   │   ├── models/ ✅
+│   │   │   │   ├── User.js ✅
+│   │   │   │   ├── Mailbox.js ✅
+│   │   │   │   ├── Domain.js ✅
+│   │   │   │   ├── Certificate.js ✅
+│   │   │   │   ├── index.js ✅
+│   │   │   │   └── README.md ✅
 │   │   │   ├── routes/
 │   │   │   │   ├── auth.js
 │   │   │   │   ├── mailboxes.js
@@ -83,36 +84,36 @@ mssante-operator/
 │   │   │   │   │   └── indicatorsService.js
 │   │   │   │   └── certificates/
 │   │   │   │       └── certificateService.js
-│   │   │   ├── jobs/
-│   │   │   │   ├── annuaireRetry.js
-│   │   │   │   ├── annuaireBatch.js
-│   │   │   │   ├── generateIndicators.js
-│   │   │   │   ├── downloadReports.js
-│   │   │   │   ├── certificateMonitor.js
-│   │   │   │   ├── cleanupSessions.js
-│   │   │   │   ├── dailyStatistics.js
-│   │   │   │   └── index.js
-│   │   │   ├── utils/
-│   │   │   │   ├── logger.js
-│   │   │   │   ├── smtp.js
-│   │   │   │   ├── crypto.js
-│   │   │   │   ├── validators.js
-│   │   │   │   ├── helpers.js
-│   │   │   │   └── index.js
-│   │   │   ├── server.js
-│   │   │   └── app.js
+│   │   │   ├── jobs/ ✅
+│   │   │   │   ├── annuaireRetry.js ✅
+│   │   │   │   ├── annuaireBatch.js ✅
+│   │   │   │   ├── generateIndicators.js ✅
+│   │   │   │   ├── downloadReports.js ✅
+│   │   │   │   ├── certificateMonitor.js ✅
+│   │   │   │   ├── cleanupSessions.js ✅
+│   │   │   │   ├── dailyStatistics.js ✅
+│   │   │   │   └── index.js ✅
+│   │   │   ├── utils/ ✅
+│   │   │   │   ├── logger.js ✅
+│   │   │   │   ├── smtp.js ✅
+│   │   │   │   ├── crypto.js ✅
+│   │   │   │   ├── validators.js ✅
+│   │   │   │   ├── helpers.js ✅
+│   │   │   │   └── index.js ✅
+│   │   │   ├── server.js ✅
+│   │   │   └── app.js ✅
 │   │   ├── tests/
 │   │   │   ├── unit/
 │   │   │   ├── integration/
 │   │   │   └── e2e/
-│   │   ├── .env.example
-│   │   ├── .env.development
-│   │   ├── .env.production
-│   │   ├── .eslintrc.js
-│   │   ├── .prettierrc
-│   │   ├── Dockerfile
-│   │   ├── package.json
-│   │   └── README.md
+│   │   ├── .env.example ✅
+│   │   ├── .env.development ✅
+│   │   ├── .env.production ✅
+│   │   ├── .eslintrc.js ✅
+│   │   ├── .prettierrc ✅
+│   │   ├── Dockerfile ✅
+│   │   ├── package.json ✅
+│   │   └── README.md ✅
 │   │
 │   ├── frontend/                     # Frontend React
 │   │   ├── public/
@@ -313,16 +314,16 @@ mssante-operator/
 │   ├── backups/
 │   └── certificates/
 │
-├── .gitignore
+├── .gitignore ✅
 ├── .dockerignore
 ├── .env.example
 ├── docker-compose.yml
 ├── docker-compose.dev.yml
 ├── docker-compose.prod.yml
-├── Makefile
-├── package.json                      # Scripts racine
-├── README.md
-└── LICENSE
+├── Makefile ✅
+├── package.json ✅                      # Scripts racine
+├── README.md ✅
+└── LICENSE ✅
 ```
 
 ---
