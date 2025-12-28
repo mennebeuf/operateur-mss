@@ -7,50 +7,16 @@ const logger = require('../utils/logger');
 
 /**
  * Middleware de logging des requêtes HTTP
+ * Utilise la méthode logger.request() du logger personnalisé
  */
 const requestLogger = (req, res, next) => {
   const startTime = Date.now();
   
-  // Données de la requête
-  const requestData = {
-    requestId: req.requestId,
-    method: req.method,
-    url: req.originalUrl,
-    ip: req.ip || req.connection?.remoteAddress,
-    userAgent: req.headers['user-agent'],
-    referer: req.headers['referer'],
-    contentLength: req.headers['content-length']
-  };
-  
-  // Log au début de la requête (niveau debug)
-  logger.debug('Requête entrante', requestData);
-  
   // Intercepter la fin de la réponse
-  const originalEnd = res.end;
-  res.end = function(chunk, encoding) {
-    res.end = originalEnd;
-    res.end(chunk, encoding);
-    
+  res.on('finish', () => {
     const duration = Date.now() - startTime;
-    const responseData = {
-      ...requestData,
-      statusCode: res.statusCode,
-      duration: `${duration}ms`,
-      contentLength: res.getHeader('content-length')
-    };
-    
-    // Niveau de log selon le status
-    if (res.statusCode >= 500) {
-      logger.error('Réponse serveur error', responseData);
-    } else if (res.statusCode >= 400) {
-      logger.warn('Réponse client error', responseData);
-    } else if (duration > 5000) {
-      // Alerter sur les requêtes lentes
-      logger.warn('Requête lente', responseData);
-    } else {
-      logger.info('Réponse envoyée', responseData);
-    }
-  };
+    logger.request(req, res, duration);
+  });
   
   next();
 };
@@ -65,31 +31,30 @@ const sensitiveRequestLogger = (req, res, next) => {
   // Masquer les données sensibles
   const sanitizedBody = req.body ? sanitizeBody(req.body) : undefined;
   
-  const requestData = {
-    requestId: req.requestId,
+  // Log de sécurité pour les requêtes sensibles
+  logger.security('sensitive_request', {
     method: req.method,
     url: req.originalUrl,
     ip: req.ip,
     userId: req.user?.id,
     userEmail: req.user?.email,
     body: sanitizedBody
-  };
-  
-  logger.info('Requête sensible', requestData);
+  });
   
   // Intercepter la réponse
-  const originalSend = res.send;
-  res.send = function(body) {
+  res.on('finish', () => {
     const duration = Date.now() - startTime;
     
-    logger.info('Réponse sensible', {
-      requestId: req.requestId,
-      statusCode: res.statusCode,
-      duration: `${duration}ms`
-    });
-    
-    return originalSend.call(this, body);
-  };
+    if (res.statusCode >= 400) {
+      logger.security('sensitive_request_error', {
+        method: req.method,
+        url: req.originalUrl,
+        statusCode: res.statusCode,
+        duration: `${duration}ms`,
+        userId: req.user?.id
+      });
+    }
+  });
   
   next();
 };

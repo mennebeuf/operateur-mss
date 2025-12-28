@@ -125,10 +125,16 @@ const requirePermission = (permissions, options = {}) => {
         : checks.some(Boolean);  // Au moins une
       
       if (!hasPermission) {
-        logger.warn(`Permission refusée: ${req.user.email} n'a pas ${permArray.join(', ')}`);
+        logger.security('permission_denied', {
+          userId: req.user.id,
+          email: req.user.email,
+          required: permArray,
+          mode: requireAll ? 'all' : 'any',
+          path: req.originalUrl
+        });
         throw new ApiError(403, 'Permission insuffisante', 'PERMISSION_DENIED', {
           required: permArray,
-          mode: requireAll ? 'all' : 'any'
+          mode: requireAll ? 'any' : 'all'
         });
       }
       
@@ -151,7 +157,11 @@ const requireSuperAdmin = async (req, res, next) => {
     const isAdmin = await isSuperAdmin(req.user.id);
     
     if (!isAdmin) {
-      logger.warn(`Accès super admin refusé: ${req.user.email}`);
+      logger.security('super_admin_denied', {
+        userId: req.user.id,
+        email: req.user.email,
+        path: req.originalUrl
+      });
       throw new ApiError(403, 'Accès réservé aux super administrateurs', 'SUPER_ADMIN_REQUIRED');
     }
     
@@ -185,7 +195,12 @@ const requireDomainAdmin = async (req, res, next) => {
     const isAdmin = await isDomainAdmin(req.user.id, domainId);
     
     if (!isAdmin) {
-      logger.warn(`Accès admin domaine refusé: ${req.user.email} pour domaine ${domainId}`);
+      logger.security('domain_admin_denied', {
+        userId: req.user.id,
+        email: req.user.email,
+        domainId,
+        path: req.originalUrl
+      });
       throw new ApiError(403, 'Accès réservé aux administrateurs du domaine', 'DOMAIN_ADMIN_REQUIRED');
     }
     

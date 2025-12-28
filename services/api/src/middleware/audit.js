@@ -106,18 +106,20 @@ const logAudit = async (data) => {
       errorMessage
     ]);
     
-    // Log aussi dans Winston pour monitoring temps réel
-    logger.info('Audit:', {
-      action,
+    // Log aussi avec le security logger pour monitoring temps réel
+    logger.security(action, {
       userId,
+      userEmail,
       resourceType,
       resourceId,
-      status
+      domainId,
+      status,
+      ip
     });
     
   } catch (error) {
     // Ne pas bloquer l'application si l'audit échoue
-    logger.error('Erreur enregistrement audit:', error);
+    logger.error('Erreur enregistrement audit:', { error: error.message });
   }
 };
 

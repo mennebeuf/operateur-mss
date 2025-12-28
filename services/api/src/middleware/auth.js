@@ -85,6 +85,7 @@ const authenticate = async (req, res, next) => {
     
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
+      logger.auth('failure', { reason: 'token_expired', ip: req.ip });
       return res.status(401).json({
         error: 'Token expiré',
         code: 'AUTH_TOKEN_EXPIRED'
@@ -92,13 +93,14 @@ const authenticate = async (req, res, next) => {
     }
     
     if (error.name === 'JsonWebTokenError') {
+      logger.auth('failure', { reason: 'token_invalid', ip: req.ip });
       return res.status(401).json({
         error: 'Token invalide',
         code: 'AUTH_TOKEN_INVALID'
       });
     }
     
-    logger.error('Erreur authentification:', error);
+    logger.serviceError('auth', error);
     return res.status(500).json({
       error: 'Erreur d\'authentification',
       code: 'AUTH_ERROR'
@@ -155,7 +157,11 @@ const authorize = (...allowedRoles) => {
     const userRole = req.user.role?.name || req.user.role;
     
     if (!allowedRoles.includes(userRole)) {
-      logger.warn(`Accès refusé pour ${req.user.email} (role: ${userRole})`);
+      logger.auth('forbidden', { 
+        email: req.user.email, 
+        role: userRole, 
+        required: allowedRoles 
+      });
       return res.status(403).json({
         error: 'Accès non autorisé',
         code: 'AUTH_FORBIDDEN',
