@@ -20,6 +20,7 @@ logs/
 # Certificats
 config/certificates/domains/*
 !config/certificates/domains/.gitkeep
+!config/certificates/domains/README.md
 config/certificates/*.pem
 config/certificates/*.key
 
