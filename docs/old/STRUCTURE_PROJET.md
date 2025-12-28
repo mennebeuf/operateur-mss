@@ -50,6 +50,9 @@ mssante-operator/
 │   │   │   │   ├── permissions.js
 │   │   │   │   ├── domainContext.js
 │   │   │   │   ├── validation.js
+│   │   │   │   ├── quota.js
+│   │   │   │   ├── requestLogger.js
+│   │   │   │   ├── audit.js
 │   │   │   │   └── errorHandler.js
 │   │   │   ├── models/
 │   │   │   │   ├── User.js
