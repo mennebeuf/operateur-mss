@@ -26,11 +26,11 @@ services/
 ```
 mssante-operator/
 │
-├── .vscode/                          # Configuration VSCode
-│   ├── settings.json                 # Paramètres workspace
-│   ├── launch.json                   # Configuration debug
-│   ├── extensions.json               # Extensions recommandées
-│   └── tasks.json                    # Tâches automatisées
+├── .vscode/ ✅                          # Configuration VSCode
+│   ├── settings.json ✅                 # Paramètres workspace
+│   ├── launch.json ✅                   # Configuration debug
+│   ├── extensions.json ✅               # Extensions recommandées
+│   └── tasks.json ✅                    # Tâches automatisées
 │
 ├── services/                         # Microservices
 │   │
@@ -61,20 +61,26 @@ mssante-operator/
 │   │   │   │   ├── Certificate.js ✅
 │   │   │   │   ├── index.js ✅
 │   │   │   │   └── README.md ✅
-│   │   │   ├── routes/
-│   │   │   │   ├── auth.js
-│   │   │   │   ├── mailboxes.js
-│   │   │   │   ├── users.js
-│   │   │   │   ├── domains.js
-│   │   │   │   ├── email.js
-│   │   │   │   └── admin/
-│   │   │   │       ├── index.js
-│   │   │   │       ├── domains.js
-│   │   │   │       ├── users.js
-│   │   │   │       ├── certificates.js
-│   │   │   │       ├── statistics.js
-│   │   │   │       ├── annuaire.js
-│   │   │   │       └── monitoring.js
+│   │   │   ├── routes/ ✅
+│   │   │   │   ├── index.js ✅
+│   │   │   │   ├── auth.js ✅
+│   │   │   │   ├── mailboxes.js ✅
+│   │   │   │   ├── users.js ✅
+│   │   │   │   ├── domains.js ✅
+│   │   │   │   ├── email.js ✅
+│   │   │   │   ├── certificates.js ✅
+│   │   │   │   ├── audit.js ✅
+│   │   │   │   ├── annuaire.js ✅
+│   │   │   │   └── admin/ ✅
+│   │   │   │       ├── index.js ✅
+│   │   │   │       ├── domains.js ✅
+│   │   │   │       ├── users.js ✅
+│   │   │   │       ├── certificates.js ✅
+│   │   │   │       ├── settings.js ✅
+│   │   │   │       ├── statistics.js ✅
+│   │   │   │       ├── annuaire.js ✅
+│   │   │   │       ├── audit.js ✅
+│   │   │   │       └── monitoring.js ✅
 │   │   │   ├── services/ ✅
 │   │   │   │   ├── index.js ✅                    # Point d'entrée principal
 │   │   │   │   ├── annuaire.js ✅                 # Service Annuaire National MSSanté
@@ -243,64 +249,67 @@ mssante-operator/
 │       └── grafana/
 │           └── dashboards/
 │
-├── config/                           # Configuration globale
-│   ├── traefik/
-│   │   ├── traefik.yml
-│   │   └── dynamic.yml
-│   ├── prometheus/
-│   │   └── prometheus.yml
-│   ├── certificates/
+├── config/ ✅                           # Configuration globale
+│   ├── traefik/ ✅
+│   │   ├── traefik.yml ✅
+│   │   └── dynamic.yml ✅
+│   ├── prometheus/ ✅
+│   │   └── prometheus.yml ✅
+│   ├── certificates/ ✅
 │   │   ├── igc-sante/
 │   │   │   ├── ca-bundle.pem
 │   │   │   └── crl.pem
-│   │   └── domains/
-│   │       └── README.md
-│   └── nginx/
-│       └── nginx.conf
+│   │   └── domains/ ✅
+│   │       └── README.md ✅
+│   └── nginx/ ✅
+│       └── nginx.conf ✅
 │
-├── database/                         # Scripts SQL
-│   ├── migrations/
-│   │   ├── 001_initial_schema.sql
-│   │   ├── 002_roles_permissions.sql
-│   │   ├── 003_multi_domains.sql
-│   │   ├── 004_annuaire.sql
-│   │   └── 005_statistics.sql
-│   ├── seeds/
-│   │   ├── dev_users.sql
-│   │   └── dev_domains.sql
+├── database/ ✅                         # Scripts SQL
+│   ├── migrations/ ✅
+│   │   ├── 001_initial_schema.sql ✅
+│   │   ├── 002_roles_permissions.sql ✅
+│   │   ├── 003_multi_domains.sql ✅
+│   │   ├── 004_annuaire.sql ✅
+│   │   └── 005_statistics.sql ✅
+│   ├── seeds/ ✅
+│   │   ├── _seed_all.sql ✅
+│   │   ├── dev_users.sql ✅
+│   │   ├── dev_mailboxes.sql ✅
+│   │   ├── dev_statistics.sql ✅
+│   │   └── dev_domains.sql ✅
 │   └── init-db.sh
 │
-├── scripts/                          # Scripts utilitaires
-│   ├── setup/
-│   │   ├── setup-env.sh
-│   │   └── install-deps.sh
-│   ├── backup/
-│   │   ├── backup.sh
-│   │   └── restore.sh
-│   ├── deploy/
-│   │   ├── deploy.sh
-│   │   ├── deploy-production.sh
-│   │   └── rollback.sh
-│   ├── certificates/
-│   │   ├── install-cert.sh
-│   │   └── renew-certs.sh
-│   └── maintenance/
-│       ├── cleanup-logs.sh
-│       └── check-health.sh
+├── scripts/ ✅                          # Scripts utilitaires
+│   ├── setup/ ✅
+│   │   ├── setup-env.sh ✅
+│   │   └── install-deps.sh ✅
+│   ├── backup/ ✅
+│   │   ├── backup.sh ✅
+│   │   └── restore.sh ✅
+│   ├── deploy/ ✅
+│   │   ├── deploy.sh ✅
+│   │   ├── deploy-production.sh ✅
+│   │   └── rollback.sh ✅
+│   ├── certificates/ ✅
+│   │   ├── install-cert.sh ✅
+│   │   └── renew-certs.sh ✅
+│   └── maintenance/ ✅
+│       ├── cleanup-logs.sh ✅
+│       └── check-health.sh ✅
 │
 ├── docs/                             # Documentation
-│   ├── architecture/
-│   │   ├── overview.md
-│   │   ├── database-schema.md
-│   │   └── api-specification.md
-│   ├── guides/
-│   │   ├── installation.md
-│   │   ├── configuration.md
-│   │   ├── deployment.md
-│   │   └── troubleshooting.md
+│   ├── architecture/ ✅
+│   │   ├── overview.md ✅
+│   │   ├── database-schema.md ✅
+│   │   └── api-specification.md ✅
+│   ├── guides/ ✅
+│   │   ├── installation.md ✅
+│   │   ├── configuration.md ✅
+│   │   ├── deployment.md ✅
+│   │   └── troubleshooting.md ✅
 │   ├── api/
 │   │   └── swagger.yaml
-│   └── admin/
+│   └── admin/ ✅
 │       ├── user-management.md
 │       └── domain-management.md
 │
