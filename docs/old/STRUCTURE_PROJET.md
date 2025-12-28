@@ -75,15 +75,18 @@ mssante-operator/
 │   │   │   │       ├── statistics.js
 │   │   │   │       ├── annuaire.js
 │   │   │   │       └── monitoring.js
-│   │   │   ├── services/
-│   │   │   │   ├── email/
-│   │   │   │   │   ├── imapService.js
-│   │   │   │   │   └── smtpService.js
-│   │   │   │   ├── annuaire/
-│   │   │   │   │   ├── annuaireService.js
-│   │   │   │   │   └── indicatorsService.js
-│   │   │   │   └── certificates/
-│   │   │   │       └── certificateService.js
+│   │   │   ├── services/ ✅
+│   │   │   │   ├── index.js ✅                    # Point d'entrée principal
+│   │   │   │   ├── annuaire.js ✅                 # Service Annuaire National MSSanté
+│   │   │   │   ├── pscService.js ✅               # Service Pro Santé Connect (OAuth 2.0)
+│   │   │   │   ├── mailService.js ✅              # Gestion des BAL (création, suppression, quotas)
+│   │   │   │   ├── certificateService.js ✅       # Gestion des certificats IGC Santé
+│   │   │   │   ├── dnsService.js ✅               # Vérification DNS (MX, SPF, DKIM, DMARC)
+│   │   │   │   ├── indicatorsService.js ✅        # Génération des indicateurs mensuels
+│   │   │   │   └── email/ ✅
+│   │   │   │       ├── index.js ✅                # Point d'entrée services email
+│   │   │   │       ├── imapService.js ✅          # Service IMAP (lecture emails)
+│   │   │   │       └── smtpService.js ✅          # Service SMTP (envoi emails)
 │   │   │   ├── jobs/ ✅
 │   │   │   │   ├── annuaireRetry.js ✅
 │   │   │   │   ├── annuaireBatch.js ✅
