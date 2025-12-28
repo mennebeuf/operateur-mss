@@ -1,0 +1,331 @@
+# config/prometheus/alerts.yml
+# Règles d'alertes Prometheus pour MSSanté Operator
+
+groups:
+  # ===========================================
+  # ALERTES SYSTÈME
+  # ===========================================
+  - name: system
+    interval: 30s
+    rules:
+      # CPU élevé
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "CPU élevé sur {{ $labels.instance }}"
+          description: "Utilisation CPU à {{ printf \"%.1f\" $value }}% depuis 5 minutes"
+
+      - alert: CriticalCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 2m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "CPU critique sur {{ $labels.instance }}"
+          description: "Utilisation CPU à {{ printf \"%.1f\" $value }}% depuis 2 minutes"
+
+      # Mémoire faible
+      - alert: LowMemory
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "Mémoire faible sur {{ $labels.instance }}"
+          description: "Mémoire disponible à {{ printf \"%.1f\" $value }}%"
+
+      - alert: CriticalMemory
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 5
+        for: 2m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "Mémoire critique sur {{ $labels.instance }}"
+          description: "Mémoire disponible à {{ printf \"%.1f\" $value }}% - intervention urgente requise"
+
+      # Disque plein
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes) * 100 < 20
+        for: 10m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "Espace disque faible sur {{ $labels.instance }}"
+          description: "Partition {{ $labels.mountpoint }} à {{ printf \"%.1f\" $value }}% d'espace libre"
+
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes) * 100 < 10
+        for: 5m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "Espace disque critique sur {{ $labels.instance }}"
+          description: "Partition {{ $labels.mountpoint }} à {{ printf \"%.1f\" $value }}% d'espace libre"
+
+      # Load average élevé
+      - alert: HighLoadAverage
+        expr: node_load15 / count without(cpu, mode) (node_cpu_seconds_total{mode="idle"}) > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "Load average élevé sur {{ $labels.instance }}"
+          description: "Load average 15min: {{ printf \"%.2f\" $value }}"
+
+  # ===========================================
+  # ALERTES SERVICES MSSANTÉ
+  # ===========================================
+  - name: mssante_services
+    interval: 30s
+    rules:
+      # Service down
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: "{{ $labels.job }}"
+        annotations:
+          summary: "Service {{ $labels.job }} indisponible"
+          description: "Le service {{ $labels.job }} ({{ $labels.instance }}) est down depuis 1 minute"
+
+      # API - Temps de réponse élevé
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="api"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "Latence API élevée"
+          description: "95e percentile de latence à {{ printf \"%.2f\" $value }}s"
+
+      # API - Taux d'erreur élevé
+      - alert: APIHighErrorRate
+        expr: rate(http_requests_total{job="api",status=~"5.."}[5m]) / rate(http_requests_total{job="api"}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "Taux d'erreur API élevé"
+          description: "Taux d'erreur 5xx à {{ printf \"%.1f\" (mul $value 100) }}%"
+
+      - alert: APICriticalErrorRate
+        expr: rate(http_requests_total{job="api",status=~"5.."}[5m]) / rate(http_requests_total{job="api"}[5m]) > 0.15
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "Taux d'erreur API critique"
+          description: "Taux d'erreur 5xx à {{ printf \"%.1f\" (mul $value 100) }}%"
+
+  # ===========================================
+  # ALERTES SERVICES MAIL
+  # ===========================================
+  - name: mail_services
+    interval: 30s
+    rules:
+      # Queue mail élevée
+      - alert: MailQueueHigh
+        expr: postfix_queue_size > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: postfix
+        annotations:
+          summary: "Queue mail élevée"
+          description: "{{ $value }} messages en attente dans la queue Postfix"
+
+      - alert: MailQueueCritical
+        expr: postfix_queue_size > 500
+        for: 5m
+        labels:
+          severity: critical
+          service: postfix
+        annotations:
+          summary: "Queue mail critique"
+          description: "{{ $value }} messages en attente - vérifier les erreurs de livraison"
+
+      # SMTP indisponible
+      - alert: SMTPDown
+        expr: probe_success{job="blackbox-smtp"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: smtp
+        annotations:
+          summary: "Service SMTP indisponible"
+          description: "Le service SMTP sur {{ $labels.instance }} ne répond pas"
+
+      # IMAP indisponible
+      - alert: IMAPDown
+        expr: probe_success{job="blackbox-imap"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: imap
+        annotations:
+          summary: "Service IMAP indisponible"
+          description: "Le service IMAP sur {{ $labels.instance }} ne répond pas"
+
+      # Taux de bounce élevé
+      - alert: HighBounceRate
+        expr: rate(postfix_bounce_total[1h]) / rate(postfix_sent_total[1h]) > 0.1
+        for: 30m
+        labels:
+          severity: warning
+          service: postfix
+        annotations:
+          summary: "Taux de bounce élevé"
+          description: "Taux de bounce à {{ printf \"%.1f\" (mul $value 100) }}% sur la dernière heure"
+
+  # ===========================================
+  # ALERTES CERTIFICATS
+  # ===========================================
+  - name: certificates
+    interval: 1h
+    rules:
+      # Certificat expire dans 30 jours
+      - alert: CertificateExpiring30Days
+        expr: (ssl_cert_not_after - time()) / 86400 < 30
+        for: 1h
+        labels:
+          severity: warning
+          service: ssl
+        annotations:
+          summary: "Certificat expire bientôt"
+          description: "Le certificat {{ $labels.instance }} expire dans {{ printf \"%.0f\" $value }} jours"
+
+      # Certificat expire dans 7 jours
+      - alert: CertificateExpiring7Days
+        expr: (ssl_cert_not_after - time()) / 86400 < 7
+        for: 1h
+        labels:
+          severity: critical
+          service: ssl
+        annotations:
+          summary: "Certificat expire très bientôt"
+          description: "Le certificat {{ $labels.instance }} expire dans {{ printf \"%.0f\" $value }} jours - RENOUVELLEMENT URGENT"
+
+      # Certificat expiré
+      - alert: CertificateExpired
+        expr: ssl_cert_not_after < time()
+        for: 0m
+        labels:
+          severity: critical
+          service: ssl
+        annotations:
+          summary: "Certificat expiré"
+          description: "Le certificat {{ $labels.instance }} est EXPIRÉ"
+
+  # ===========================================
+  # ALERTES BASE DE DONNÉES
+  # ===========================================
+  - name: database
+    interval: 30s
+    rules:
+      # Connexions PostgreSQL élevées
+      - alert: PostgresHighConnections
+        expr: pg_stat_activity_count / pg_settings_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          service: postgres
+        annotations:
+          summary: "Connexions PostgreSQL élevées"
+          description: "{{ printf \"%.0f\" (mul $value 100) }}% des connexions utilisées"
+
+      # PostgreSQL down
+      - alert: PostgresDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: "PostgreSQL indisponible"
+          description: "La base de données PostgreSQL ne répond pas"
+
+      # Requêtes lentes
+      - alert: PostgresSlowQueries
+        expr: rate(pg_stat_statements_seconds_total[5m]) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: postgres
+        annotations:
+          summary: "Requêtes PostgreSQL lentes"
+          description: "Temps moyen des requêtes élevé"
+
+      # Redis down
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis indisponible"
+          description: "Le cache Redis ne répond pas"
+
+      # Redis mémoire élevée
+      - alert: RedisHighMemory
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Mémoire Redis élevée"
+          description: "Redis utilise {{ printf \"%.0f\" (mul $value 100) }}% de sa mémoire maximale"
+
+  # ===========================================
+  # ALERTES CONTENEURS
+  # ===========================================
+  - name: containers
+    interval: 30s
+    rules:
+      # Conteneur redémarré
+      - alert: ContainerRestarted
+        expr: increase(container_start_time_seconds[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "Conteneur redémarré"
+          description: "Le conteneur {{ $labels.name }} a redémarré"
+
+      # Conteneur CPU élevé
+      - alert: ContainerHighCPU
+        expr: rate(container_cpu_usage_seconds_total{name!=""}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "CPU conteneur élevé"
+          description: "Le conteneur {{ $labels.name }} utilise {{ printf \"%.1f\" $value }}% CPU"
+
+      # Conteneur mémoire élevée
+      - alert: ContainerHighMemory
+        expr: container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: docker
+        annotations:
+          summary: "Mémoire conteneur élevée"
+          description: "Le conteneur {{ $labels.name }} utilise {{ printf \"%.0f\" (mul $value 100) }}% de sa limite mémoire"

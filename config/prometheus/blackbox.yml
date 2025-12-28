@@ -1,0 +1,170 @@
+# config/prometheus/blackbox.yml
+# Configuration Blackbox Exporter pour les sondes HTTP/TCP/SMTP/IMAP
+
+modules:
+  # ===========================================
+  # SONDES HTTP
+  # ===========================================
+  
+  # HTTP standard - Vérifie code 2xx
+  http_2xx:
+    prober: http
+    timeout: 10s
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      valid_status_codes: [200, 201, 202, 204]
+      method: GET
+      follow_redirects: true
+      preferred_ip_protocol: "ip4"
+      tls_config:
+        insecure_skip_verify: false
+
+  # HTTP avec vérification de contenu
+  http_2xx_content:
+    prober: http
+    timeout: 10s
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      valid_status_codes: [200]
+      method: GET
+      fail_if_body_not_matches_regexp:
+        - "healthy|ok|success"
+      follow_redirects: true
+      preferred_ip_protocol: "ip4"
+
+  # HTTP POST (pour health checks API)
+  http_post_2xx:
+    prober: http
+    timeout: 10s
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      valid_status_codes: [200, 201, 202]
+      method: POST
+      headers:
+        Content-Type: application/json
+      preferred_ip_protocol: "ip4"
+
+  # HTTP avec authentification basique
+  http_basic_auth:
+    prober: http
+    timeout: 10s
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      valid_status_codes: [200]
+      method: GET
+      basic_auth:
+        username: "{{ HTTP_BASIC_USER }}"
+        password: "{{ HTTP_BASIC_PASSWORD }}"
+
+  # ===========================================
+  # SONDES SMTP
+  # ===========================================
+  
+  # SMTP avec STARTTLS (port 587)
+  smtp_starttls:
+    prober: tcp
+    timeout: 10s
+    tcp:
+      query_response:
+        - expect: "^220"
+        - send: "EHLO blackbox"
+        - expect: "^250"
+        - send: "STARTTLS"
+        - expect: "^220"
+      tls: true
+      tls_config:
+        insecure_skip_verify: false
+
+  # SMTP simple (port 25)
+  smtp_banner:
+    prober: tcp
+    timeout: 10s
+    tcp:
+      query_response:
+        - expect: "^220"
+        - send: "EHLO blackbox"
+        - expect: "^250"
+        - send: "QUIT"
+        - expect: "^221"
+
+  # ===========================================
+  # SONDES IMAP
+  # ===========================================
+  
+  # IMAP avec STARTTLS
+  imap_starttls:
+    prober: tcp
+    timeout: 10s
+    tcp:
+      query_response:
+        - expect: "^\\* OK"
+        - send: "A001 CAPABILITY"
+        - expect: "STARTTLS"
+        - send: "A002 STARTTLS"
+        - expect: "A002 OK"
+      tls: true
+      tls_config:
+        insecure_skip_verify: false
+
+  # IMAP simple
+  imap_banner:
+    prober: tcp
+    timeout: 10s
+    tcp:
+      query_response:
+        - expect: "^\\* OK"
+        - send: "A001 LOGOUT"
+        - expect: "^\\* BYE"
+
+  # ===========================================
+  # SONDES TCP GÉNÉRIQUES
+  # ===========================================
+  
+  # TCP simple - Vérifie que le port répond
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+
+  # TCP avec TLS
+  tcp_connect_tls:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      tls: true
+      tls_config:
+        insecure_skip_verify: false
+
+  # ===========================================
+  # SONDES DNS
+  # ===========================================
+  
+  # DNS - Résolution A record
+  dns_a:
+    prober: dns
+    timeout: 5s
+    dns:
+      query_name: "votre-domaine.mssante.fr"
+      query_type: "A"
+      valid_rcodes:
+        - NOERROR
+
+  # DNS - Résolution MX record
+  dns_mx:
+    prober: dns
+    timeout: 5s
+    dns:
+      query_name: "votre-domaine.mssante.fr"
+      query_type: "MX"
+      valid_rcodes:
+        - NOERROR
+
+  # ===========================================
+  # SONDES ICMP
+  # ===========================================
+  
+  # Ping ICMP
+  icmp:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: "ip4"

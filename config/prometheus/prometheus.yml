@@ -1,0 +1,165 @@
+# config/prometheus/prometheus.yml
+# Configuration Prometheus pour MSSanté Operator
+
+global:
+  scrape_interval: 15s          # Fréquence de collecte des métriques
+  evaluation_interval: 15s       # Fréquence d'évaluation des règles
+  external_labels:
+    monitor: 'mssante-operator'
+    environment: 'production'
+
+# Fichiers de règles d'alertes
+rule_files:
+  - 'alerts.yml'
+
+# Configuration AlertManager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+      timeout: 10s
+
+# Configuration des cibles de scrape
+scrape_configs:
+  # ===========================================
+  # Prometheus lui-même
+  # ===========================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: /metrics
+
+  # ===========================================
+  # Node Exporter - Métriques système (CPU, RAM, Disque)
+  # ===========================================
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+):\d+'
+        replacement: '${1}'
+
+  # ===========================================
+  # Traefik - Reverse Proxy
+  # ===========================================
+  - job_name: 'traefik'
+    static_configs:
+      - targets: ['traefik:8080']
+    metrics_path: /metrics
+
+  # ===========================================
+  # API Backend (Node.js)
+  # ===========================================
+  - job_name: 'api'
+    static_configs:
+      - targets: ['api:3000']
+    metrics_path: /metrics
+    scrape_interval: 10s
+
+  # ===========================================
+  # PostgreSQL Exporter
+  # ===========================================
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  # ===========================================
+  # Redis Exporter
+  # ===========================================
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  # ===========================================
+  # Postfix Exporter - Service SMTP
+  # ===========================================
+  - job_name: 'postfix'
+    static_configs:
+      - targets: ['postfix-exporter:9154']
+    scrape_interval: 30s
+
+  # ===========================================
+  # Dovecot Exporter - Service IMAP
+  # ===========================================
+  - job_name: 'dovecot'
+    static_configs:
+      - targets: ['dovecot-exporter:9166']
+    scrape_interval: 30s
+
+  # ===========================================
+  # Blackbox Exporter - Sondes HTTP/TCP/ICMP
+  # ===========================================
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://votre-domaine.mssante.fr        # Frontend
+          - https://api.votre-domaine.mssante.fr/health  # API Health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: 'blackbox-smtp'
+    metrics_path: /probe
+    params:
+      module: [smtp_starttls]
+    static_configs:
+      - targets:
+          - mail.votre-domaine.mssante.fr:587
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  - job_name: 'blackbox-imap'
+    metrics_path: /probe
+    params:
+      module: [imap_starttls]
+    static_configs:
+      - targets:
+          - mail.votre-domaine.mssante.fr:143
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # ===========================================
+  # SSL Certificate Exporter - Surveillance certificats
+  # ===========================================
+  - job_name: 'ssl'
+    metrics_path: /probe
+    static_configs:
+      - targets:
+          - votre-domaine.mssante.fr:443
+          - api.votre-domaine.mssante.fr:443
+          - mail.votre-domaine.mssante.fr:587
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: ssl-exporter:9219
+
+  # ===========================================
+  # cAdvisor - Métriques conteneurs Docker
+  # ===========================================
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s

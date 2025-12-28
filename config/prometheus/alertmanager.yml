@@ -1,0 +1,178 @@
+# config/prometheus/alertmanager.yml
+# Configuration AlertManager pour MSSanté Operator
+
+global:
+  # Délai avant de considérer une alerte comme résolue
+  resolve_timeout: 5m
+  
+  # Configuration SMTP pour les notifications email
+  smtp_smarthost: 'smtp.votre-domaine.fr:587'
+  smtp_from: 'alerting@votre-domaine.mssante.fr'
+  smtp_auth_username: 'alerting@votre-domaine.mssante.fr'
+  smtp_auth_password: 'VOTRE_MOT_DE_PASSE_SMTP'
+  smtp_require_tls: true
+
+# Templates personnalisés pour les notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Configuration du routage des alertes
+route:
+  # Regroupement par nom d'alerte et service
+  group_by: ['alertname', 'service', 'severity']
+  
+  # Attendre avant d'envoyer la première notification
+  group_wait: 30s
+  
+  # Attendre avant d'envoyer les notifications de nouvelles alertes du même groupe
+  group_interval: 5m
+  
+  # Intervalle de répétition des notifications non résolues
+  repeat_interval: 4h
+  
+  # Receiver par défaut
+  receiver: 'team-mssante'
+  
+  # Routes spécifiques selon la sévérité
+  routes:
+    # Alertes critiques - PagerDuty + Email immédiat
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 10s
+      repeat_interval: 1h
+      continue: true
+    
+    # Alertes certificats - Équipe sécurité
+    - match:
+        service: ssl
+      receiver: 'security-team'
+      group_wait: 1m
+      repeat_interval: 12h
+    
+    # Alertes base de données - DBA
+    - match_re:
+        service: (postgres|redis)
+      receiver: 'dba-team'
+      group_wait: 30s
+      repeat_interval: 2h
+    
+    # Alertes services mail - Équipe mail
+    - match_re:
+        service: (postfix|dovecot|smtp|imap)
+      receiver: 'mail-team'
+      group_wait: 30s
+      repeat_interval: 2h
+    
+    # Alertes warning - Slack uniquement
+    - match:
+        severity: warning
+      receiver: 'slack-warnings'
+      group_wait: 1m
+      repeat_interval: 6h
+
+# Règles d'inhibition (suppression d'alertes redondantes)
+inhibit_rules:
+  # Si un service est down, ignorer les alertes de performance associées
+  - source_match:
+      alertname: 'ServiceDown'
+    target_match_re:
+      alertname: '(APIHighLatency|APIHighErrorRate|MailQueueHigh)'
+    equal: ['service']
+  
+  # Si PostgreSQL est down, ignorer les alertes de connexions
+  - source_match:
+      alertname: 'PostgresDown'
+    target_match:
+      alertname: 'PostgresHighConnections'
+  
+  # Les alertes critiques inhibent les warnings du même type
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'service']
+
+# Configuration des receivers
+receivers:
+  # =============================================
+  # Équipe MSSanté principale
+  # =============================================
+  - name: 'team-mssante'
+    email_configs:
+      - to: 'ops@votre-domaine.fr'
+        send_resolved: true
+        headers:
+          Subject: '[MSSanté] {{ .Status | toUpper }}: {{ .CommonLabels.alertname }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/VOTRE/WEBHOOK/URL'
+        channel: '#mssante-alerts'
+        username: 'AlertManager'
+        icon_emoji: ':warning:'
+        send_resolved: true
+        title: '{{ .Status | toUpper }}: {{ .CommonLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+
+  # =============================================
+  # Alertes critiques - PagerDuty + Email urgent
+  # =============================================
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'ops-critical@votre-domaine.fr'
+        send_resolved: true
+        headers:
+          Subject: '[MSSanté CRITICAL] {{ .CommonLabels.alertname }}'
+          Priority: 'urgent'
+    pagerduty_configs:
+      - service_key: 'VOTRE_CLE_SERVICE_PAGERDUTY'
+        severity: 'critical'
+        description: '{{ .CommonLabels.alertname }}: {{ .CommonAnnotations.summary }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/VOTRE/WEBHOOK/URL'
+        channel: '#mssante-critical'
+        username: 'AlertManager'
+        icon_emoji: ':rotating_light:'
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+
+  # =============================================
+  # Équipe sécurité (certificats)
+  # =============================================
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@votre-domaine.fr'
+        send_resolved: true
+        headers:
+          Subject: '[MSSanté Security] {{ .CommonLabels.alertname }}'
+
+  # =============================================
+  # Équipe DBA (base de données)
+  # =============================================
+  - name: 'dba-team'
+    email_configs:
+      - to: 'dba@votre-domaine.fr'
+        send_resolved: true
+        headers:
+          Subject: '[MSSanté Database] {{ .CommonLabels.alertname }}'
+
+  # =============================================
+  # Équipe mail (Postfix/Dovecot)
+  # =============================================
+  - name: 'mail-team'
+    email_configs:
+      - to: 'mail-ops@votre-domaine.fr'
+        send_resolved: true
+        headers:
+          Subject: '[MSSanté Mail] {{ .CommonLabels.alertname }}'
+
+  # =============================================
+  # Slack warnings uniquement
+  # =============================================
+  - name: 'slack-warnings'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/VOTRE/WEBHOOK/URL'
+        channel: '#mssante-warnings'
+        username: 'AlertManager'
+        icon_emoji: ':warning:'
+        send_resolved: true
+        color: 'warning'
