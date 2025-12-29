@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Configuration pour les tuiles Windows (IE11, Edge Legacy)
+  https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/dn320426(v=vs.85)
+-->
+<browserconfig>
+  <msapplication>
+    <tile>
+      <!-- Images pour différentes tailles de tuiles -->
+      <square70x70logo src="/mstile-70x70.png"/>
+      <square150x150logo src="/mstile-150x150.png"/>
+      <square310x310logo src="/mstile-310x310.png"/>
+      <wide310x150logo src="/mstile-310x150.png"/>
+      
+      <!-- Couleur de fond de la tuile -->
+      <TileColor>#1e40af</TileColor>
+    </tile>
+    
+    <!-- Configuration de la barre de notification -->
+    <notification>
+      <polling-uri src="https://mail.votre-domaine.mssante.fr/api/v1/notifications/tile"/>
+      <frequency>30</frequency>
+      <cycle>1</cycle>
+    </notification>
+    
+    <!-- Badge de notification -->
+    <badge>
+      <polling-uri src="https://mail.votre-domaine.mssante.fr/api/v1/notifications/badge"/>
+      <frequency>30</frequency>
+    </badge>
+  </msapplication>
+</browserconfig>

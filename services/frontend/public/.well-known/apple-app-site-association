@@ -1,0 +1,29 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.fr.mssante.operateur.mail",
+        "paths": [
+          "/webmail/*",
+          "/callback/*",
+          "/login",
+          "/dashboard/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAMID.fr.mssante.operateur.mail"
+    ]
+  },
+  "appclips": {
+    "apps": []
+  },
+  "activitycontinuation": {
+    "apps": [
+      "TEAMID.fr.mssante.operateur.mail"
+    ]
+  }
+}

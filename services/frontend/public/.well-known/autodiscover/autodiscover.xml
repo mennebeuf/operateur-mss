@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration automatique pour Microsoft Outlook
+  Spécification : Exchange Autodiscover Protocol
+-->
+<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
+  <Response xmlns="http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a">
+    <Account>
+      <AccountType>email</AccountType>
+      <Action>settings</Action>
+      
+      <!-- Configuration du protocole IMAP -->
+      <Protocol>
+        <Type>IMAP</Type>
+        <Server>imap.votre-domaine.mssante.fr</Server>
+        <Port>993</Port>
+        <SSL>on</SSL>
+        <SPA>off</SPA>
+        <AuthRequired>on</AuthRequired>
+        <LoginName></LoginName>
+        <DomainRequired>off</DomainRequired>
+      </Protocol>
+      
+      <!-- Configuration du protocole SMTP -->
+      <Protocol>
+        <Type>SMTP</Type>
+        <Server>smtp.votre-domaine.mssante.fr</Server>
+        <Port>587</Port>
+        <SSL>on</SSL>
+        <Encryption>TLS</Encryption>
+        <SPA>off</SPA>
+        <AuthRequired>on</AuthRequired>
+        <LoginName></LoginName>
+        <DomainRequired>off</DomainRequired>
+        <UsePOPAuth>off</UsePOPAuth>
+        <SMTPLast>off</SMTPLast>
+      </Protocol>
+      
+      <!-- Informations complémentaires -->
+      <Protocol>
+        <Type>WEB</Type>
+        <Internal>
+          <OWAUrl AuthenticationMethod="Basic">https://mail.votre-domaine.mssante.fr/webmail</OWAUrl>
+        </Internal>
+        <External>
+          <OWAUrl AuthenticationMethod="Basic">https://mail.votre-domaine.mssante.fr/webmail</OWAUrl>
+        </External>
+      </Protocol>
+    </Account>
+  </Response>
+</Autodiscover>

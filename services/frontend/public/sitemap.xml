@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <!-- Page d'accueil / Login -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Page de connexion -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/login</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  
+  <!-- Page d'aide -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/aide</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <!-- Guide de configuration -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/aide/configuration</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- FAQ -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/aide/faq</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <!-- Mentions légales -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/mentions-legales</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  
+  <!-- Politique de confidentialité -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/politique-confidentialite</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  
+  <!-- CGU -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/cgu</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  
+  <!-- Contact -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/contact</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <!-- Page sécurité -->
+  <url>
+    <loc>https://mail.votre-domaine.mssante.fr/securite</loc>
+    <lastmod>2025-01-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  
+  <!-- 
+    NOTE : Les pages protégées (webmail, admin, dashboard)
+    ne sont pas incluses dans le sitemap car elles nécessitent
+    une authentification et ne doivent pas être indexées.
+  -->
+  
+</urlset>

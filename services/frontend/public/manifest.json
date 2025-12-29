@@ -1,0 +1,90 @@
+{
+  "short_name": "MSSanté",
+  "name": "MSSanté - Messagerie Sécurisée de Santé",
+  "description": "Plateforme de messagerie sécurisée pour les professionnels de santé, conforme aux exigences MSSanté de l'ANS",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#1e40af",
+  "background_color": "#f3f4f6",
+  "categories": ["medical", "health", "productivity", "business"],
+  "lang": "fr-FR",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Nouvelle message",
+      "short_name": "Composer",
+      "description": "Rédiger un nouveau message sécurisé",
+      "url": "/webmail/compose",
+      "icons": [{ "src": "icons/compose-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Boîte de réception",
+      "short_name": "Inbox",
+      "description": "Accéder à la boîte de réception",
+      "url": "/webmail",
+      "icons": [{ "src": "icons/inbox-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Annuaire",
+      "short_name": "Annuaire",
+      "description": "Rechercher dans l'annuaire MSSanté",
+      "url": "/annuaire",
+      "icons": [{ "src": "icons/directory-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/webmail-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Interface webmail sur ordinateur"
+    },
+    {
+      "src": "screenshots/webmail-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Interface webmail sur mobile"
+    }
+  ],
+  "related_applications": [],
+  "iarc_rating_id": "",
+  "share_target": {
+    "action": "/webmail/compose",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "subject",
+      "text": "body",
+      "files": [
+        {
+          "name": "attachments",
+          "accept": ["*/*"]
+        }
+      ]
+    }
+  }
+}

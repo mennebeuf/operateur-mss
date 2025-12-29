@@ -1,0 +1,36 @@
+/* TEAM */
+
+Développeur Principal:
+    Équipe Technique
+    Site: https://votre-domaine.mssante.fr
+    Localisation: France
+
+/* THANKS */
+
+Agence du Numérique en Santé (ANS):
+    Pour les spécifications MSSanté
+    Site: https://esante.gouv.fr
+
+Communauté Open Source:
+    React, Node.js, PostgreSQL, Redis
+    Postfix, Dovecot, et tous les contributeurs
+
+/* SITE */
+
+Dernière mise à jour: 2025/01
+Standards: HTML5, CSS3, ES2022
+Composants: React 18, TailwindCSS
+Logiciels: VS Code, Docker, Git
+Langages: JavaScript, TypeScript
+
+/* CONFORMITÉ */
+
+Référentiel: MSSanté v2.4
+Certification: IGC-Santé
+Authentification: Pro Santé Connect (PSC)
+Sécurité: TLS 1.3, DKIM, SPF, DMARC
+
+/* LICENCE */
+
+Ce projet est développé pour un opérateur MSSanté
+en conformité avec les exigences de l'ANS.

@@ -1,0 +1,81 @@
+# robots.txt pour MSSanté
+# https://www.robotstxt.org/
+
+# Règles par défaut pour tous les robots
+User-agent: *
+
+# Pages publiques autorisées
+Allow: /
+Allow: /login
+Allow: /aide
+Allow: /mentions-legales
+Allow: /politique-confidentialite
+
+# Pages privées interdites (sécurité)
+Disallow: /webmail
+Disallow: /webmail/*
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api
+Disallow: /api/*
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /mailboxes
+Disallow: /mailboxes/*
+Disallow: /settings
+Disallow: /settings/*
+Disallow: /callback
+Disallow: /callback/*
+
+# Fichiers sensibles
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /config-v1.1.xml
+Disallow: /.well-known/autoconfig/*
+
+# Assets autorisés
+Allow: /static/
+Allow: /*.css$
+Allow: /*.js$
+Allow: /*.png$
+Allow: /*.ico$
+Allow: /*.svg$
+
+# Délai entre requêtes (en secondes)
+Crawl-delay: 10
+
+# Sitemap
+Sitemap: https://mail.votre-domaine.mssante.fr/sitemap.xml
+
+# Règles spécifiques pour les bots d'IA
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+# Règles pour Googlebot
+User-agent: Googlebot
+Disallow: /webmail
+Disallow: /admin
+Disallow: /api
+Crawl-delay: 5
+
+# Règles pour Bingbot
+User-agent: Bingbot
+Disallow: /webmail
+Disallow: /admin
+Disallow: /api
+Crawl-delay: 5

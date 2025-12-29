@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png" />
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  
+  <!-- Meta SEO -->
+  <meta name="theme-color" content="#1e40af" />
+  <meta name="description" content="Plateforme de messagerie sécurisée MSSanté - Opérateur de messagerie de santé conforme aux exigences de l'ANS" />
+  <meta name="keywords" content="MSSanté, messagerie santé, email sécurisé, santé, professionnel de santé, ANS" />
+  <meta name="author" content="Opérateur MSSanté" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="MSSanté - Messagerie Sécurisée de Santé" />
+  <meta property="og:description" content="Plateforme de messagerie sécurisée pour les professionnels de santé" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="%PUBLIC_URL%/og-image.png" />
+  <meta property="og:locale" content="fr_FR" />
+  
+  <!-- Security Headers (CSP géré côté serveur) -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  
+  <!-- Preconnect pour optimisation -->
+  <link rel="preconnect" href="https://auth.esw.esante.gouv.fr" />
+  <link rel="dns-prefetch" href="https://auth.esw.esante.gouv.fr" />
+  
+  <title>MSSanté - Messagerie Sécurisée de Santé</title>
+  
+  <!-- Styles critiques inline pour éviter FOUC -->
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    #root{min-height:100vh}
+    .app-loading{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f3f4f6}
+    .app-loading-spinner{width:48px;height:48px;border:4px solid #e5e7eb;border-top-color:#1e40af;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .app-loading-text{margin-top:16px;color:#6b7280;font-size:14px}
+  </style>
+</head>
+<body>
+  <noscript>
+    <div style="padding:40px;text-align:center;font-family:system-ui,sans-serif">
+      <h1>JavaScript requis</h1>
+      <p>Pour utiliser la plateforme MSSanté, vous devez activer JavaScript dans votre navigateur.</p>
+      <p>Cette application nécessite JavaScript pour fonctionner correctement et garantir la sécurité de vos données.</p>
+    </div>
+  </noscript>
+  
+  <div id="root">
+    <!-- Écran de chargement initial -->
+    <div class="app-loading">
+      <div style="text-align:center">
+        <div class="app-loading-spinner"></div>
+        <p class="app-loading-text">Chargement de MSSanté...</p>
+      </div>
+    </div>
+  </div>
+  
+  <!--
+    Ce fichier HTML est un template. Le contenu sera remplacé
+    lors du build par les scripts et styles générés par Vite/React.
+  -->
+</body>
+</html>

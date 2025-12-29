@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration automatique des clients mail (Thunderbird, etc.)
+  Spécification : https://wiki.mozilla.org/Thunderbird:Autoconfiguration:ConfigFileFormat
+-->
+<clientConfig version="1.1">
+  <emailProvider id="votre-domaine.mssante.fr">
+    <!-- Domaines gérés -->
+    <domain>votre-domaine.mssante.fr</domain>
+    <domain>*.votre-domaine.mssante.fr</domain>
+    
+    <!-- Informations affichées -->
+    <displayName>MSSanté - Votre Organisation</displayName>
+    <displayShortName>MSSanté</displayShortName>
+    
+    <!-- Configuration IMAP (réception) -->
+    <incomingServer type="imap">
+      <hostname>imap.votre-domaine.mssante.fr</hostname>
+      <port>993</port>
+      <socketType>SSL</socketType>
+      <authentication>OAuth2</authentication>
+      <username>%EMAILADDRESS%</username>
+      
+      <!-- Configuration OAuth2 Pro Santé Connect -->
+      <oauth2>
+        <issuer>https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet</issuer>
+        <scope>openid email profile scope_all</scope>
+        <authURL>https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/auth</authURL>
+        <tokenURL>https://auth.esw.esante.gouv.fr/auth/realms/esante-wallet/protocol/openid-connect/token</tokenURL>
+      </oauth2>
+    </incomingServer>
+    
+    <!-- Configuration IMAP alternative (STARTTLS) -->
+    <incomingServer type="imap">
+      <hostname>imap.votre-domaine.mssante.fr</hostname>
+      <port>143</port>
+      <socketType>STARTTLS</socketType>
+      <authentication>OAuth2</authentication>
+      <authentication>password-cleartext</authentication>
+      <username>%EMAILADDRESS%</username>
+    </incomingServer>
+    
+    <!-- Configuration SMTP (envoi) -->
+    <outgoingServer type="smtp">
+      <hostname>smtp.votre-domaine.mssante.fr</hostname>
+      <port>465</port>
+      <socketType>SSL</socketType>
+      <authentication>OAuth2</authentication>
+      <username>%EMAILADDRESS%</username>
+      <restriction>client-IP-address</restriction>
+    </outgoingServer>
+    
+    <!-- Configuration SMTP alternative (STARTTLS) -->
+    <outgoingServer type="smtp">
+      <hostname>smtp.votre-domaine.mssante.fr</hostname>
+      <port>587</port>
+      <socketType>STARTTLS</socketType>
+      <authentication>OAuth2</authentication>
+      <authentication>password-cleartext</authentication>
+      <username>%EMAILADDRESS%</username>
+    </outgoingServer>
+    
+    <!-- Documentation et aide -->
+    <documentation url="https://votre-domaine.mssante.fr/aide/configuration">
+      <descr lang="fr">Guide de configuration des clients de messagerie</descr>
+    </documentation>
+    
+    <documentation url="https://votre-domaine.mssante.fr/aide/psc">
+      <descr lang="fr">Configuration Pro Santé Connect (OAuth2)</descr>
+    </documentation>
+    
+    <!-- Webmail -->
+    <webMail>
+      <loginPage url="https://mail.votre-domaine.mssante.fr/login" />
+      <loginPageInfo url="https://mail.votre-domaine.mssante.fr/webmail">
+        <username>%EMAILADDRESS%</username>
+      </loginPageInfo>
+    </webMail>
+    
+    <!-- Paramètres de sécurité spécifiques MSSanté -->
+    <properties>
+      <property key="mssante.operator.finess">XXXXXXXXX</property>
+      <property key="mssante.operator.name">Votre Organisation</property>
+      <property key="mssante.compliance.level">standard</property>
+      <property key="security.certificate.required">true</property>
+      <property key="security.tls.min_version">1.2</property>
+    </properties>
+  </emailProvider>
+</clientConfig>

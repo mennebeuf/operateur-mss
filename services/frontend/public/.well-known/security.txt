@@ -1,0 +1,50 @@
+# Fichier security.txt conforme RFC 9116
+# https://securitytxt.org/
+
+# Contact pour signaler les vulnérabilités
+Contact: mailto:security@votre-domaine.mssante.fr
+Contact: https://votre-domaine.mssante.fr/securite/signalement
+
+# Clé PGP pour communications chiffrées
+Encryption: https://votre-domaine.mssante.fr/.well-known/pgp-key.txt
+
+# Date d'expiration de ce fichier (à renouveler annuellement)
+Expires: 2026-12-31T23:59:59.000Z
+
+# Langue préférée
+Preferred-Languages: fr, en
+
+# Politique de divulgation responsable
+Policy: https://votre-domaine.mssante.fr/securite/politique-divulgation
+
+# Remerciements aux chercheurs en sécurité
+Acknowledgments: https://votre-domaine.mssante.fr/securite/remerciements
+
+# Offres d'emploi sécurité (optionnel)
+Hiring: https://votre-domaine.mssante.fr/carrieres/securite
+
+# Informations canoniques
+Canonical: https://votre-domaine.mssante.fr/.well-known/security.txt
+
+# ============================================
+# INFORMATIONS COMPLÉMENTAIRES
+# ============================================
+#
+# Ce système est un opérateur de messagerie MSSanté
+# conforme aux exigences de l'Agence du Numérique en Santé (ANS).
+#
+# Les données traitées sont des données de santé protégées.
+# Tout accès non autorisé est strictement interdit et
+# sera poursuivi conformément aux articles 323-1 et suivants
+# du Code pénal français.
+#
+# Pour toute question concernant la sécurité de cette plateforme,
+# merci de contacter notre équipe de sécurité à l'adresse
+# indiquée ci-dessus.
+#
+# Nous nous engageons à :
+# - Accuser réception de votre signalement sous 48h
+# - Vous tenir informé de l'avancement de l'analyse
+# - Ne pas engager de poursuites pour les recherches de bonne foi
+# - Vous créditer (si souhaité) pour les vulnérabilités confirmées
+#
