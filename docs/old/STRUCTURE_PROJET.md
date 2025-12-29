@@ -128,10 +128,18 @@ mssante-operator/
 │   │   │   │   │   ├── quota.test.js ✅
 │   │   │   │   │   ├── requestLogger.test.js ✅
 │   │   │   │   │   └── validation.test.js ✅               # Tests validation Joi
-│   │   │   │   ├── services/
-│   │   │   │   │   ├── annuaireService.test.js          # Tests publication annuaire ANS
-│   │   │   │   │   ├── indicatorsService.test.js        # Tests indicateurs mensuels
-│   │   │   │   │   └── certificateService.test.js       # Tests gestion certificats IGC
+│   │   │   │   ├── services/ ✅
+│   │   │   │   │   ├── __mocks__/ ✅
+│   │   │   │   │   │   ├── database.js ✅    # Mock PostgreSQL
+│   │   │   │   │   │   ├── redis.js ✅       # Mock Redis
+│   │   │   │   │   │   └── logger.js ✅      # Mock Logger
+│   │   │   │   │   ├── index.test.js ✅      # Tests d'export des services
+│   │   │   │   │   ├── annuaireService.test.js ✅          # Tests publication annuaire ANS
+│   │   │   │   │   ├── dnsService.test.js ✅
+│   │   │   │   │   ├── mailService.test.js ✅
+│   │   │   │   │   ├── pscService.test.js ✅
+│   │   │   │   │   ├── indicatorsService.test.js ✅        # Tests indicateurs mensuels
+│   │   │   │   │   └── certificateService.test.js ✅       # Tests gestion certificats IGC
 │   │   │   │   ├── models/ ✅
 │   │   │   │   │   ├── User.test.js ✅                     # Tests modèle User
 │   │   │   │   │   ├── Mailbox.test.js ✅                  # Tests modèle Mailbox
