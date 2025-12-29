@@ -113,16 +113,21 @@ mssante-operator/
 │   │   │   └── app.js ✅
 │   │   ├── tests/
 │   │   │   ├── unit/
-│   │   │   │   ├── setup.js ✅                              # Configuration globale Jest
+│   │   │   │   ├── setup.js ✅                             # Configuration globale Jest
 │   │   │   │   ├── controllers/ ✅
 │   │   │   │   │   ├── authController.test.js ✅           # Tests authentification (login, logout, refresh, PSC)
 │   │   │   │   │   ├── mailboxController.test.js ✅        # Tests gestion des BAL (CRUD, suspend, delegate)
 │   │   │   │   │   ├── userController.test.js ✅           # Tests gestion utilisateurs
 │   │   │   │   │   └── domainController.test.js ✅         # Tests gestion domaines
 │   │   │   │   ├── middleware/
-│   │   │   │   │   ├── auth.test.js                     # Tests middleware JWT
-│   │   │   │   │   ├── permissions.test.js              # Tests RBAC (permissions, rôles)
-│   │   │   │   │   └── validation.test.js               # Tests validation Joi
+│   │   │   │   │   ├── auth.test.js ✅                     # Tests middleware JWT
+│   │   │   │   │   ├── audit.test.js ✅
+│   │   │   │   │   ├── domainContext.test.js ✅
+│   │   │   │   │   ├── errorHandler.test.js ✅
+│   │   │   │   │   ├── permissions.test.js ✅              # Tests RBAC (permissions, rôles)
+│   │   │   │   │   ├── quota.test.js ✅
+│   │   │   │   │   ├── requestLogger.test.js ✅
+│   │   │   │   │   └── validation.test.js ✅               # Tests validation Joi
 │   │   │   │   ├── services/
 │   │   │   │   │   ├── annuaireService.test.js          # Tests publication annuaire ANS
 │   │   │   │   │   ├── indicatorsService.test.js        # Tests indicateurs mensuels
