@@ -128,21 +128,22 @@ mssante-operator/
 │   │   │   │   │   ├── quota.test.js ✅
 │   │   │   │   │   ├── requestLogger.test.js ✅
 │   │   │   │   │   └── validation.test.js ✅               # Tests validation Joi
-│   │   │   │   ├── services/ ✅
-│   │   │   │   │   ├── annuaireService.test.js ✅          # Tests publication annuaire ANS
-│   │   │   │   │   ├── indicatorsService.test.js ✅        # Tests indicateurs mensuels
-│   │   │   │   │   └── certificateService.test.js ✅       # Tests gestion certificats IGC
+│   │   │   │   ├── services/
+│   │   │   │   │   ├── annuaireService.test.js          # Tests publication annuaire ANS
+│   │   │   │   │   ├── indicatorsService.test.js        # Tests indicateurs mensuels
+│   │   │   │   │   └── certificateService.test.js       # Tests gestion certificats IGC
 │   │   │   │   ├── models/ ✅
 │   │   │   │   │   ├── User.test.js ✅                     # Tests modèle User
 │   │   │   │   │   ├── Mailbox.test.js ✅                  # Tests modèle Mailbox
 │   │   │   │   │   ├── Domain.test.js ✅                   # Tests modèle Domain
 │   │   │   │   │   └── Certificate.test.js ✅              # Tests modèle Certificate
-│   │   │   │   └── utils/
-│   │   │   │       ├── helpers.test.js                  # Tests fonctions utilitaires
-│   │   │   │       ├── crypto.test.js                   # Tests chiffrement/hash
-│   │   │   │       ├── logger.test.js
-│   │   │   │       ├── validators.test.js
-│   │   │   │       └── smtp.test.js                     # Tests client SMTP
+│   │   │   │   └── utils/ ✅
+│   │   │   │       ├── helpers.test.js ✅                  # Tests fonctions utilitaires
+│   │   │   │       ├── crypto.test.js ✅                   # Tests chiffrement/hash
+│   │   │   │       ├── logger.test.js ✅
+│   │   │   │       ├── validators.test.js ✅
+│   │   │   │       ├── index.test.js ✅
+│   │   │   │       └── smtp.test.js ✅                     # Tests client SMTP
 │   │   │   ├── integration/
 │   │   │   └── e2e/
 │   │   ├── .env.example ✅
