@@ -21,28 +21,32 @@ describe('ImapService', () => {
   let mockImap;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    ImapService.connections.clear();
-    
-    mockImap = {
-      state: 'authenticated',
-      connect: jest.fn(),
-      end: jest.fn(),
-      openBox: jest.fn(),
-      getBoxes: jest.fn(),
-      search: jest.fn(),
-      fetch: jest.fn(),
-      addFlags: jest.fn(),
-      delFlags: jest.fn(),
-      move: jest.fn(),
-      once: jest.fn((event, cb) => {
-        if (event === 'ready') setTimeout(() => cb(), 0);
-      }),
-      on: jest.fn()
-    };
-    
-    Imap.mockImplementation(() => mockImap);
-  });
+  jest.clearAllMocks();
+  ImapService.connections.clear();
+  
+  mockImap = {
+    state: 'authenticated',
+    connect: jest.fn(),
+    end: jest.fn(),
+    openBox: jest.fn(),
+    getBoxes: jest.fn(),
+    search: jest.fn(),
+    fetch: jest.fn(),
+    addFlags: jest.fn(),
+    delFlags: jest.fn(),
+    move: jest.fn(),
+    once: jest.fn((event, cb) => {
+      if (event === 'ready') {setTimeout(() => cb(), 0);}
+    }),
+    on: jest.fn(),
+    // Ajouter seq avec sa propre méthode fetch
+    seq: {
+      fetch: jest.fn()
+    }
+  };
+  
+  Imap.mockImplementation(() => mockImap);
+});
 
   describe('getConnection', () => {
     it('devrait créer une nouvelle connexion IMAP', async () => {
@@ -65,7 +69,7 @@ describe('ImapService', () => {
 
     it('devrait gérer les erreurs de connexion', async () => {
       mockImap.once = jest.fn((event, cb) => {
-        if (event === 'error') setTimeout(() => cb(new Error('Connection failed')), 0);
+        if (event === 'error') {setTimeout(() => cb(new Error('Connection failed')), 0);}
       });
       
       await expect(ImapService.getConnection('user@test.fr', 'token'))
@@ -107,45 +111,76 @@ describe('ImapService', () => {
       mockImap.openBox = jest.fn((folder, readOnly, cb) => {
         cb(null, { messages: { total: 100 } });
       });
-      
-      mockImap.search = jest.fn((criteria, cb) => {
-        cb(null, [1, 2, 3, 4, 5]);
-      });
+
+      // Stocker les callbacks pour les déclencher manuellement
+      const fetchCallbacks = {};
       
       const mockFetch = {
         on: jest.fn((event, cb) => {
-          if (event === 'message') {
-            const msg = {
+          fetchCallbacks[event] = cb;
+        }),
+        once: jest.fn((event, cb) => {
+          fetchCallbacks[event] = cb;
+        })
+      };
+
+      mockImap.seq.fetch = jest.fn(() => {
+        // Déclencher les événements de manière asynchrone
+        setImmediate(() => {
+          // Simuler un message
+          if (fetchCallbacks['message']) {
+            const mockStream = {
+              on: jest.fn((ev, handler) => {
+                if (ev === 'data') {
+                  handler(Buffer.from('From: sender@test.fr\r\nSubject: Test\r\n'));
+                }
+              }),
+              once: jest.fn((ev, handler) => {
+                if (ev === 'end') handler();
+              })
+            };
+
+            const mockMsg = {
               on: jest.fn((e, c) => {
                 if (e === 'body') {
-                  c({ on: jest.fn((ev, handler) => {
-                    if (ev === 'data') handler(Buffer.from('test'));
-                    if (ev === 'end') handler();
-                  })});
+                  c(mockStream, { which: 'HEADER.FIELDS' });
                 }
-                if (e === 'attributes') c({ uid: 1, flags: [] });
               }),
-              once: jest.fn((e, c) => { if (e === 'end') c(); })
+              once: jest.fn((e, c) => {
+                if (e === 'attributes') {
+                  c({ uid: 1, flags: ['\\Seen'], size: 1024 });
+                }
+                if (e === 'end') c();
+              })
             };
-            cb(msg, 1);
+
+            fetchCallbacks['message'](mockMsg, 1);
           }
-          if (event === 'end') cb();
-        }),
-        once: jest.fn()
-      };
-      
-      mockImap.fetch = jest.fn(() => mockFetch);
-      
-      simpleParser.mockResolvedValue({
-        from: { value: [{ address: 'sender@test.fr', name: 'Sender' }] },
-        subject: 'Test Subject',
-        date: new Date('2025-01-01')
+
+          // Terminer le fetch
+          if (fetchCallbacks['end']) {
+            fetchCallbacks['end']();
+          }
+        });
+
+        return mockFetch;
       });
-      
+
+      // Mock de Imap.parseHeader
+      Imap.parseHeader = jest.fn(() => ({
+        from: ['sender@test.fr'],
+        to: ['recipient@test.fr'],
+        subject: ['Test Subject'],
+        date: ['Mon, 01 Jan 2025 00:00:00 +0000'],
+        'message-id': ['<test@example.com>']
+      }));
+
       const result = await ImapService.listMessages('user@test.fr', 'token', 'INBOX', { page: 1, limit: 20 });
-      
+
       expect(result).toHaveProperty('messages');
-      expect(result).toHaveProperty('total');
+      expect(result).toHaveProperty('total', 100);
+      expect(result).toHaveProperty('page', 1);
+      expect(result.messages).toHaveLength(1);
     });
   });
 

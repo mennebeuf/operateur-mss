@@ -27,14 +27,14 @@ describe('Services Index', () => {
 
   describe('Annuaire Services', () => {
     it('devrait exporter annuaireService', () => {
-      const annuaireService = require('../../../src/services/annuaire/annuaireService');
+      const annuaireService = require('../../../src/services/annuaireService');
       expect(annuaireService).toBeDefined();
       expect(typeof annuaireService.registerMailbox).toBe('function');
       expect(typeof annuaireService.searchDirectory).toBe('function');
     });
 
     it('devrait exporter indicatorsService', () => {
-      const indicatorsService = require('../../../src/services/annuaire/indicatorsService');
+      const indicatorsService = require('../../../src/services/indicatorsService');
       expect(indicatorsService).toBeDefined();
       expect(typeof indicatorsService.generateMonthlyIndicators).toBe('function');
     });
@@ -42,7 +42,7 @@ describe('Services Index', () => {
 
   describe('Certificate Services', () => {
     it('devrait exporter certificateService', () => {
-      const certificateService = require('../../../src/services/certificates/certificateService');
+      const certificateService = require('../../../src/services/certificateService');
       expect(certificateService).toBeDefined();
       expect(typeof certificateService.parseCertificate).toBe('function');
       expect(typeof certificateService.validateCertificate).toBe('function');

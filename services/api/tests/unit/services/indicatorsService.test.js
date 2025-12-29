@@ -2,7 +2,7 @@
 // services/api/tests/unit/services/indicatorsService.test.js
 // ============================================================
 
-const IndicatorsService = require('../../../src/services/annuaire/indicatorsService');
+const IndicatorsService = require('../../../src/services/indicatorsService');
 
 jest.mock('../../../src/config/database', () => ({
   pool: {
