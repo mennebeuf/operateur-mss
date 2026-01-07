@@ -23,14 +23,14 @@ const DomainsList = () => {
         ...(filter !== 'all' && { status: filter }),
         ...(search && { search })
       });
-      
+
       const response = await fetch(`/api/v1/admin/domains?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setDomains(data.data.domains);
         setPagination(prev => ({
@@ -46,25 +46,29 @@ const DomainsList = () => {
     }
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     e.preventDefault();
     setPagination(prev => ({ ...prev, page: 1 }));
     loadDomains();
   };
 
-  const handleSuspend = async (domainId) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir suspendre ce domaine ? Tous les utilisateurs perdront l\'accès.')) {
+  const handleSuspend = async domainId => {
+    if (
+      !window.confirm(
+        "Êtes-vous sûr de vouloir suspendre ce domaine ? Tous les utilisateurs perdront l'accès."
+      )
+    ) {
       return;
     }
-    
+
     try {
       const response = await fetch(`/api/v1/admin/domains/${domainId}/suspend`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-      
+
       if (response.ok) {
         loadDomains();
       }
@@ -73,15 +77,15 @@ const DomainsList = () => {
     }
   };
 
-  const handleActivate = async (domainId) => {
+  const handleActivate = async domainId => {
     try {
       const response = await fetch(`/api/v1/admin/domains/${domainId}/activate`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-      
+
       if (response.ok) {
         loadDomains();
       }
@@ -90,7 +94,7 @@ const DomainsList = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = status => {
     const styles = {
       active: 'bg-green-100 text-green-800',
       suspended: 'bg-red-100 text-red-800',
@@ -102,15 +106,18 @@ const DomainsList = () => {
       pending: 'En attente'
     };
     return (
-      <span className={`px-2 py-1 text-xs font-semibold rounded ${styles[status] || 'bg-gray-100'}`}>
+      <span
+        className={`px-2 py-1 text-xs font-semibold rounded ${styles[status] || 'bg-gray-100'}`}
+      >
         {labels[status] || status}
       </span>
     );
   };
 
-  const filteredDomains = domains.filter(domain =>
-    domain.domain_name.toLowerCase().includes(search.toLowerCase()) ||
-    domain.organization_name.toLowerCase().includes(search.toLowerCase())
+  const filteredDomains = domains.filter(
+    domain =>
+      domain.domain_name.toLowerCase().includes(search.toLowerCase()) ||
+      domain.organization_name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -131,15 +138,18 @@ const DomainsList = () => {
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher par nom ou organisation..."
               className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </form>
-          
+
           <select
             value={filter}
-            onChange={(e) => { setFilter(e.target.value); setPagination(p => ({ ...p, page: 1 })); }}
+            onChange={e => {
+              setFilter(e.target.value);
+              setPagination(p => ({ ...p, page: 1 }));
+            }}
             className="px-4 py-2 border rounded-md"
           >
             <option value="all">Tous les statuts</option>
@@ -158,12 +168,24 @@ const DomainsList = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domaine</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">FINESS</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BAL</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateurs</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Domaine
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    FINESS
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    BAL
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Utilisateurs
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -176,9 +198,7 @@ const DomainsList = () => {
                         Créé le {new Date(domain.created_at).toLocaleDateString('fr-FR')}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {domain.finess_juridique}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{domain.finess_juridique}</td>
                     <td className="px-6 py-4">
                       <div className="text-sm">
                         {domain.mailboxes_count} / {domain.quotas?.max_mailboxes || '∞'}
@@ -192,12 +212,8 @@ const DomainsList = () => {
                         />
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      {domain.users_count || 0}
-                    </td>
-                    <td className="px-6 py-4">
-                      {getStatusBadge(domain.status)}
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">{domain.users_count || 0}</td>
+                    <td className="px-6 py-4">{getStatusBadge(domain.status)}</td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
                         <Link
@@ -249,7 +265,9 @@ const DomainsList = () => {
               Page {pagination.page} / {pagination.totalPages}
             </span>
             <button
-              onClick={() => setPagination(p => ({ ...p, page: Math.min(p.totalPages, p.page + 1) }))}
+              onClick={() =>
+                setPagination(p => ({ ...p, page: Math.min(p.totalPages, p.page + 1) }))
+              }
               disabled={pagination.page === pagination.totalPages}
               className="px-3 py-1 border rounded disabled:opacity-50"
             >

@@ -1,55 +1,84 @@
 // services/frontend/src/components/Email/AttachmentItem.jsx
 import React, { useState } from 'react';
+
 import { emailApi } from '../../services/emailApi';
 
-const AttachmentItem = ({ attachment, messageUid, folder = 'INBOX', onRemove, isEditable = false }) => {
+const AttachmentItem = ({
+  attachment,
+  messageUid,
+  folder = 'INBOX',
+  onRemove,
+  isEditable = false
+}) => {
   const [downloading, setDownloading] = useState(false);
 
   // Déterminer l'icône selon le type MIME
   const getIcon = () => {
     const type = attachment.contentType || attachment.type || '';
-    
-    if (type.startsWith('image/')) return '🖼️';
-    if (type.startsWith('video/')) return '🎬';
-    if (type.startsWith('audio/')) return '🎵';
-    if (type.includes('pdf')) return '📕';
-    if (type.includes('word') || type.includes('document')) return '📘';
-    if (type.includes('excel') || type.includes('spreadsheet')) return '📗';
-    if (type.includes('powerpoint') || type.includes('presentation')) return '📙';
-    if (type.includes('zip') || type.includes('rar') || type.includes('archive')) return '📦';
-    if (type.includes('text')) return '📄';
+
+    if (type.startsWith('image/')) {
+      return '🖼️';
+    }
+    if (type.startsWith('video/')) {
+      return '🎬';
+    }
+    if (type.startsWith('audio/')) {
+      return '🎵';
+    }
+    if (type.includes('pdf')) {
+      return '📕';
+    }
+    if (type.includes('word') || type.includes('document')) {
+      return '📘';
+    }
+    if (type.includes('excel') || type.includes('spreadsheet')) {
+      return '📗';
+    }
+    if (type.includes('powerpoint') || type.includes('presentation')) {
+      return '📙';
+    }
+    if (type.includes('zip') || type.includes('rar') || type.includes('archive')) {
+      return '📦';
+    }
+    if (type.includes('text')) {
+      return '📄';
+    }
     return '📎';
   };
 
   // Formater la taille du fichier
-  const formatSize = (bytes) => {
-    if (!bytes) return '';
-    
+  const formatSize = bytes => {
+    if (!bytes) {
+      return '';
+    }
+
     const units = ['o', 'Ko', 'Mo', 'Go'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(unitIndex > 0 ? 1 : 0)} ${units[unitIndex]}`;
   };
 
   // Télécharger la pièce jointe
   const handleDownload = async () => {
-    if (!messageUid || isEditable) return;
-    
+    if (!messageUid || isEditable) {
+      return;
+    }
+
     setDownloading(true);
-    
+
     try {
       const response = await emailApi.downloadAttachment(
         messageUid,
         attachment.partId || attachment.id,
         folder
       );
-      
+
       // Créer un lien de téléchargement
       const blob = new Blob([response.data], { type: attachment.contentType });
       const url = window.URL.createObjectURL(blob);
@@ -60,7 +89,6 @@ const AttachmentItem = ({ attachment, messageUid, folder = 'INBOX', onRemove, is
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
     } catch (error) {
       console.error('Erreur téléchargement:', error);
       alert('Erreur lors du téléchargement de la pièce jointe');
@@ -70,7 +98,7 @@ const AttachmentItem = ({ attachment, messageUid, folder = 'INBOX', onRemove, is
   };
 
   // Supprimer (mode édition uniquement)
-  const handleRemove = (e) => {
+  const handleRemove = e => {
     e.stopPropagation();
     onRemove?.(attachment);
   };
@@ -89,9 +117,7 @@ const AttachmentItem = ({ attachment, messageUid, folder = 'INBOX', onRemove, is
       title={isEditable ? attachment.filename : 'Cliquez pour télécharger'}
     >
       {/* Icône */}
-      <span className="text-lg flex-shrink-0">
-        {downloading ? '⏳' : getIcon()}
-      </span>
+      <span className="text-lg flex-shrink-0">{downloading ? '⏳' : getIcon()}</span>
 
       {/* Infos fichier */}
       <div className="min-w-0 flex-1">
@@ -99,9 +125,7 @@ const AttachmentItem = ({ attachment, messageUid, folder = 'INBOX', onRemove, is
           {attachment.filename || attachment.name || 'Fichier'}
         </div>
         {attachment.size && (
-          <div className="text-xs text-gray-500">
-            {formatSize(attachment.size)}
-          </div>
+          <div className="text-xs text-gray-500">{formatSize(attachment.size)}</div>
         )}
       </div>
 

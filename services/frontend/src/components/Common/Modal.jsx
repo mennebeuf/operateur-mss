@@ -7,7 +7,7 @@ const sizes = {
   md: 'max-w-lg',
   lg: 'max-w-2xl',
   xl: 'max-w-4xl',
-  full: 'max-w-full mx-4',
+  full: 'max-w-full mx-4'
 };
 
 const Modal = ({
@@ -20,33 +20,38 @@ const Modal = ({
   closeOnOverlayClick = true,
   closeOnEscape = true,
   footer,
-  className = '',
+  className = ''
 }) => {
-  const handleEscape = useCallback((e) => {
-    if (e.key === 'Escape' && closeOnEscape) {
-      onClose();
-    }
-  }, [closeOnEscape, onClose]);
+  const handleEscape = useCallback(
+    e => {
+      if (e.key === 'Escape' && closeOnEscape) {
+        onClose();
+      }
+    },
+    [closeOnEscape, onClose]
+  );
 
   useEffect(() => {
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
     }
-    
+
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, handleEscape]);
 
-  const handleOverlayClick = (e) => {
+  const handleOverlayClick = e => {
     if (e.target === e.currentTarget && closeOnOverlayClick) {
       onClose();
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   const sizeClasses = sizes[size] || sizes.md;
 
@@ -60,16 +65,13 @@ const Modal = ({
     >
       <div
         className={`bg-white rounded-xl shadow-2xl w-full ${sizeClasses} transform transition-all animate-scaleIn ${className}`}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         {(title || showCloseButton) && (
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
             {title && (
-              <h2
-                id="modal-title"
-                className="text-xl font-semibold text-gray-900"
-              >
+              <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
                 {title}
               </h2>
             )}
@@ -79,12 +81,7 @@ const Modal = ({
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 aria-label="Fermer"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -98,15 +95,11 @@ const Modal = ({
         )}
 
         {/* Body */}
-        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
-          {children}
-        </div>
+        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">{children}</div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-            {footer}
-          </div>
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">{footer}</div>
         )}
       </div>
     </div>
@@ -125,12 +118,12 @@ export const ConfirmModal = ({
   confirmText = 'Confirmer',
   cancelText = 'Annuler',
   variant = 'danger',
-  loading = false,
+  loading = false
 }) => {
   const variantClasses = {
     danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
     warning: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500',
-    info: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
+    info: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
   };
 
   return (

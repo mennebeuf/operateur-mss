@@ -29,7 +29,7 @@ export const adminApi = {
    */
   async getRecentActivity(limit = 10) {
     const response = await api.get(`${ADMIN_ENDPOINT}/dashboard/activity`, {
-      params: { limit },
+      params: { limit }
     });
     return response.data;
   },
@@ -99,7 +99,7 @@ export const adminApi = {
    */
   async getDomainStats(id, period = '30d') {
     const response = await api.get(`${ADMIN_ENDPOINT}/domains/${id}/stats`, {
-      params: { period },
+      params: { period }
     });
     return response.data;
   },
@@ -241,7 +241,7 @@ export const adminApi = {
    */
   async uploadCertificate(formData) {
     const response = await api.post(`${ADMIN_ENDPOINT}/certificates`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
   },
@@ -259,7 +259,7 @@ export const adminApi = {
    */
   async getExpiringCertificates(days = 30) {
     const response = await api.get(`${ADMIN_ENDPOINT}/certificates/expiring`, {
-      params: { days },
+      params: { days }
     });
     return response.data;
   },
@@ -313,7 +313,7 @@ export const adminApi = {
    */
   async getMonthlyIndicators(year, month) {
     const response = await api.get(`${ADMIN_ENDPOINT}/indicators/monthly`, {
-      params: { year, month },
+      params: { year, month }
     });
     return response.data;
   },
@@ -343,7 +343,7 @@ export const adminApi = {
    */
   async getGlobalStats(period = '30d') {
     const response = await api.get(`${ADMIN_ENDPOINT}/statistics/global`, {
-      params: { period },
+      params: { period }
     });
     return response.data;
   },
@@ -362,7 +362,7 @@ export const adminApi = {
   async exportStats(type, params = {}) {
     const response = await api.get(`${ADMIN_ENDPOINT}/statistics/export/${type}`, {
       params,
-      responseType: 'blob',
+      responseType: 'blob'
     });
     return response.data;
   },
@@ -413,7 +413,7 @@ export const adminApi = {
   async exportAuditLogs(params = {}) {
     const response = await api.get(`${ADMIN_ENDPOINT}/audit/export`, {
       params,
-      responseType: 'blob',
+      responseType: 'blob'
     });
     return response.data;
   },
@@ -444,7 +444,7 @@ export const adminApi = {
   async getRoles() {
     const response = await api.get(`${ADMIN_ENDPOINT}/roles`);
     return response.data;
-  },
+  }
 };
 
 export default adminApi;

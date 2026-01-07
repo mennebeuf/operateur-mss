@@ -1,9 +1,9 @@
 // services/frontend/src/pages/Dashboard/components/RecentActivity.jsx
 
-import React from 'react';
-import { Link } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const activityIcons = {
   mailbox_created: '📬',
@@ -34,11 +34,11 @@ const activityColors = {
 };
 
 const RecentActivity = ({ activities, domainId }) => {
-  const formatTime = (dateStr) => {
+  const formatTime = dateStr => {
     try {
-      return formatDistanceToNow(new Date(dateStr), { 
-        addSuffix: true, 
-        locale: fr 
+      return formatDistanceToNow(new Date(dateStr), {
+        addSuffix: true,
+        locale: fr
       });
     } catch {
       return dateStr;
@@ -49,18 +49,18 @@ const RecentActivity = ({ activities, domainId }) => {
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Activité récente</h3>
-        <Link 
+        <Link
           to={`/audit?domain=${domainId}`}
           className="text-sm text-blue-600 hover:text-blue-800"
         >
           Voir tout →
         </Link>
       </div>
-      
+
       {activities && activities.length > 0 ? (
         <div className="space-y-3 max-h-80 overflow-y-auto">
           {activities.map((activity, index) => (
-            <div 
+            <div
               key={activity.id || index}
               className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition"
             >
@@ -72,19 +72,17 @@ const RecentActivity = ({ activities, domainId }) => {
                   {activity.description || activity.message}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    activityColors[activity.type] || activityColors.default
-                  }`}>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${
+                      activityColors[activity.type] || activityColors.default
+                    }`}
+                  >
                     {activity.type_label || activity.type}
                   </span>
-                  <span className="text-xs text-gray-500">
-                    {formatTime(activity.created_at)}
-                  </span>
+                  <span className="text-xs text-gray-500">{formatTime(activity.created_at)}</span>
                 </div>
                 {activity.user_name && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    par {activity.user_name}
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">par {activity.user_name}</p>
                 )}
               </div>
             </div>

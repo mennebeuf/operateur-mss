@@ -49,7 +49,7 @@ export const emailApi = {
    */
   async getMessages(folder = 'INBOX', page = 1, limit = 50, search = null) {
     const response = await api.get(`${EMAIL_ENDPOINT}/messages`, {
-      params: { folder, page, limit, search },
+      params: { folder, page, limit, search }
     });
     return response.data;
   },
@@ -59,7 +59,7 @@ export const emailApi = {
    */
   async getMessage(uid, folder = 'INBOX') {
     const response = await api.get(`${EMAIL_ENDPOINT}/messages/${uid}`, {
-      params: { folder },
+      params: { folder }
     });
     return response.data;
   },
@@ -92,9 +92,13 @@ export const emailApi = {
    * Modifier les flags d'un message
    */
   async setFlags(uid, folder, flags) {
-    const response = await api.patch(`${EMAIL_ENDPOINT}/messages/${uid}/flags`, { flags }, {
-      params: { folder },
-    });
+    const response = await api.patch(
+      `${EMAIL_ENDPOINT}/messages/${uid}/flags`,
+      { flags },
+      {
+        params: { folder }
+      }
+    );
     return response.data;
   },
 
@@ -119,7 +123,7 @@ export const emailApi = {
     const response = await api.post(`${EMAIL_ENDPOINT}/messages/move`, {
       fromFolder,
       toFolder,
-      uids,
+      uids
     });
     return response.data;
   },
@@ -131,7 +135,7 @@ export const emailApi = {
     const response = await api.post(`${EMAIL_ENDPOINT}/messages/copy`, {
       fromFolder,
       toFolder,
-      uids,
+      uids
     });
     return response.data;
   },
@@ -141,7 +145,7 @@ export const emailApi = {
    */
   async deleteMessages(folder, uids) {
     const response = await api.delete(`${EMAIL_ENDPOINT}/messages`, {
-      data: { folder, uids },
+      data: { folder, uids }
     });
     return response.data;
   },
@@ -151,7 +155,7 @@ export const emailApi = {
    */
   async permanentlyDeleteMessages(folder, uids) {
     const response = await api.delete(`${EMAIL_ENDPOINT}/messages/permanent`, {
-      data: { folder, uids },
+      data: { folder, uids }
     });
     return response.data;
   },
@@ -176,7 +180,7 @@ export const emailApi = {
       `${EMAIL_ENDPOINT}/messages/${uid}/attachments/${attachmentId}`,
       {
         params: { folder },
-        responseType: 'blob',
+        responseType: 'blob'
       }
     );
     return response.data;
@@ -187,10 +191,10 @@ export const emailApi = {
    */
   async uploadAttachments(files) {
     const formData = new FormData();
-    files.forEach((file) => formData.append('attachments', file));
+    files.forEach(file => formData.append('attachments', file));
 
     const response = await api.post(`${EMAIL_ENDPOINT}/attachments/upload`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
   },
@@ -213,7 +217,7 @@ export const emailApi = {
       dateTo: options.dateTo,
       hasAttachment: options.hasAttachment,
       page: options.page || 1,
-      limit: options.limit || 50,
+      limit: options.limit || 50
     });
     return response.data;
   },
@@ -236,7 +240,7 @@ export const emailApi = {
   async getQuota() {
     const response = await api.get(`${EMAIL_ENDPOINT}/quota`);
     return response.data;
-  },
+  }
 };
 
 export default emailApi;

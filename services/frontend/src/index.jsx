@@ -1,26 +1,25 @@
 /**
  * MSSanté Frontend - Point d'entrée principal
  * services/frontend/src/index.jsx
- * 
+ *
  * Ce fichier initialise l'application React et configure
  * les providers globaux (Auth, Domain, Query, etc.)
  */
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // Styles globaux
 import './styles/index.css';
 
+import App from './App';
 // Providers
 import { AuthProvider } from './contexts/AuthContext';
 import { DomainProvider } from './contexts/DomainContext';
-
 // Application principale
-import App from './App';
 
 // Configuration React Query
 const queryClient = new QueryClient({
@@ -39,17 +38,17 @@ const queryClient = new QueryClient({
         return failureCount < 3;
       },
       // Délai entre les retries
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       // Refetch au focus de la fenêtre
       refetchOnWindowFocus: false,
       // Refetch à la reconnexion
-      refetchOnReconnect: true,
+      refetchOnReconnect: true
     },
     mutations: {
       // Retry pour les mutations
-      retry: 1,
-    },
-  },
+      retry: 1
+    }
+  }
 });
 
 // Configuration de l'environnement
@@ -59,13 +58,16 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 if (isDevelopment) {
   console.log('🚀 MSSanté Frontend démarré en mode développement');
   console.log('📡 API URL:', process.env.REACT_APP_API_URL || '/api');
-  console.log('🔐 PSC Client ID:', process.env.REACT_APP_PSC_CLIENT_ID ? '✓ Configuré' : '✗ Non configuré');
+  console.log(
+    '🔐 PSC Client ID:',
+    process.env.REACT_APP_PSC_CLIENT_ID ? '✓ Configuré' : '✗ Non configuré'
+  );
 }
 
 // Gestion des erreurs globales non capturées
-window.addEventListener('unhandledrejection', (event) => {
+window.addEventListener('unhandledrejection', event => {
   console.error('Promesse non gérée:', event.reason);
-  
+
   // En production, envoyer à un service de monitoring
   if (!isDevelopment) {
     // TODO: Intégrer Sentry ou autre service de monitoring
@@ -101,14 +103,9 @@ root.render(
           </DomainProvider>
         </AuthProvider>
       </BrowserRouter>
-      
+
       {/* DevTools React Query (uniquement en développement) */}
-      {isDevelopment && (
-        <ReactQueryDevtools 
-          initialIsOpen={false} 
-          position="bottom-right"
-        />
-      )}
+      {isDevelopment && <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />}
     </QueryClientProvider>
   </React.StrictMode>
 );

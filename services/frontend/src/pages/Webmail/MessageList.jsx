@@ -1,30 +1,31 @@
 // services/frontend/src/pages/Webmail/MessageList.jsx
-import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import React from 'react';
 
-const MessageList = ({ 
-  messages, 
-  selectedMessage, 
-  onSelectMessage, 
-  onDelete, 
+const MessageList = ({
+  messages,
+  selectedMessage,
+  onSelectMessage,
+  onDelete,
   onToggleRead,
   onToggleFlag,
-  loading 
+  loading
 }) => {
-  
-  const getFrom = (message) => {
+  const getFrom = message => {
     if (message.from && message.from.length > 0) {
       return message.from[0].name || message.from[0].address;
     }
     return '(inconnu)';
   };
-  
-  const formatDate = (date) => {
-    if (!date) return '';
-    return formatDistanceToNow(new Date(date), { 
-      addSuffix: true, 
-      locale: fr 
+
+  const formatDate = date => {
+    if (!date) {
+      return '';
+    }
+    return formatDistanceToNow(new Date(date), {
+      addSuffix: true,
+      locale: fr
     });
   };
 
@@ -35,7 +36,7 @@ const MessageList = ({
       </div>
     );
   }
-  
+
   if (messages.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-400">
@@ -46,7 +47,7 @@ const MessageList = ({
       </div>
     );
   }
-  
+
   return (
     <div className="divide-y">
       {messages.map(message => (
@@ -54,9 +55,7 @@ const MessageList = ({
           key={message.uid}
           onClick={() => onSelectMessage(message)}
           className={`group p-4 cursor-pointer hover:bg-gray-50 transition ${
-            selectedMessage?.uid === message.uid 
-              ? 'bg-blue-50 border-l-4 border-blue-600' 
-              : ''
+            selectedMessage?.uid === message.uid ? 'bg-blue-50 border-l-4 border-blue-600' : ''
           } ${!message.isRead ? 'bg-blue-50/30' : ''}`}
         >
           <div className="flex items-start justify-between mb-1">
@@ -64,16 +63,11 @@ const MessageList = ({
               {/* Indicateurs */}
               <div className="flex gap-1 shrink-0">
                 {!message.isRead && (
-                  <span 
-                    className="w-2 h-2 bg-blue-600 rounded-full"
-                    title="Non lu"
-                  ></span>
+                  <span className="w-2 h-2 bg-blue-600 rounded-full" title="Non lu"></span>
                 )}
-                {message.hasAttachments && (
-                  <span title="Pièces jointes">📎</span>
-                )}
+                {message.hasAttachments && <span title="Pièces jointes">📎</span>}
                 <button
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     onToggleFlag(message.uid, message.isFlagged);
                   }}
@@ -85,33 +79,31 @@ const MessageList = ({
                   ⭐
                 </button>
               </div>
-              
+
               {/* Expéditeur */}
               <span className={`truncate ${!message.isRead ? 'font-semibold' : ''}`}>
                 {getFrom(message)}
               </span>
             </div>
-            
+
             {/* Date */}
             <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
               {formatDate(message.date)}
             </span>
           </div>
-          
+
           {/* Sujet */}
           <div className={`text-sm mb-1 truncate ${!message.isRead ? 'font-semibold' : ''}`}>
             {message.subject || '(sans objet)'}
           </div>
-          
+
           {/* Aperçu */}
-          <div className="text-xs text-gray-500 truncate">
-            {message.preview}
-          </div>
-          
+          <div className="text-xs text-gray-500 truncate">{message.preview}</div>
+
           {/* Actions rapides (au survol) */}
           <div className="flex gap-3 mt-2 opacity-0 group-hover:opacity-100 transition">
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onToggleRead(message.uid, message.isRead);
               }}
@@ -120,7 +112,7 @@ const MessageList = ({
               {message.isRead ? 'Marquer non lu' : 'Marquer lu'}
             </button>
             <button
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onDelete([message.uid]);
               }}

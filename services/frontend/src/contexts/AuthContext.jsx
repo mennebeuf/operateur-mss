@@ -4,8 +4,8 @@
  * Gestion de l'état d'authentification, tokens JWT et utilisateur
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   /**
    * Configurer le token dans les headers axios
    */
-  const setAuthHeader = useCallback((accessToken) => {
+  const setAuthHeader = useCallback(accessToken => {
     if (accessToken) {
       api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -45,17 +45,20 @@ export const AuthProvider = ({ children }) => {
   /**
    * Sauvegarder les tokens dans le localStorage
    */
-  const saveTokens = useCallback((accessToken, refresh) => {
-    if (accessToken) {
-      localStorage.setItem('token', accessToken);
-      setToken(accessToken);
-    }
-    if (refresh) {
-      localStorage.setItem('refreshToken', refresh);
-      setRefreshToken(refresh);
-    }
-    setAuthHeader(accessToken);
-  }, [setAuthHeader]);
+  const saveTokens = useCallback(
+    (accessToken, refresh) => {
+      if (accessToken) {
+        localStorage.setItem('token', accessToken);
+        setToken(accessToken);
+      }
+      if (refresh) {
+        localStorage.setItem('refreshToken', refresh);
+        setRefreshToken(refresh);
+      }
+      setAuthHeader(accessToken);
+    },
+    [setAuthHeader]
+  );
 
   /**
    * Supprimer les tokens
@@ -71,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   /**
    * Décoder le payload JWT (sans vérification)
    */
-  const decodeToken = (accessToken) => {
+  const decodeToken = accessToken => {
     try {
       const payload = accessToken.split('.')[1];
       return JSON.parse(atob(payload));
@@ -83,9 +86,11 @@ export const AuthProvider = ({ children }) => {
   /**
    * Vérifier si le token est expiré
    */
-  const isTokenExpired = (accessToken) => {
+  const isTokenExpired = accessToken => {
     const decoded = decodeToken(accessToken);
-    if (!decoded || !decoded.exp) return true;
+    if (!decoded || !decoded.exp) {
+      return true;
+    }
     return decoded.exp * 1000 < Date.now();
   };
 
@@ -100,10 +105,10 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/refresh', { refreshToken });
       const { token: newToken, refreshToken: newRefresh, user: userData } = response.data.data;
-      
+
       saveTokens(newToken, newRefresh);
       setUser(userData);
-      
+
       return newToken;
     } catch (err) {
       clearTokens();
@@ -115,26 +120,29 @@ export const AuthProvider = ({ children }) => {
   /**
    * Connexion avec email/mot de passe
    */
-  const login = useCallback(async (email, password) => {
-    setLoading(true);
-    setError(null);
+  const login = useCallback(
+    async (email, password) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const response = await api.post('/login', { email, password });
-      const { token: accessToken, refreshToken: refresh, user: userData } = response.data.data;
+      try {
+        const response = await api.post('/login', { email, password });
+        const { token: accessToken, refreshToken: refresh, user: userData } = response.data.data;
 
-      saveTokens(accessToken, refresh);
-      setUser(userData);
+        saveTokens(accessToken, refresh);
+        setUser(userData);
 
-      return { success: true, user: userData };
-    } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Erreur de connexion';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  }, [saveTokens]);
+        return { success: true, user: userData };
+      } catch (err) {
+        const errorMessage = err.response?.data?.error || 'Erreur de connexion';
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [saveTokens]
+  );
 
   /**
    * Déconnexion
@@ -161,26 +169,29 @@ export const AuthProvider = ({ children }) => {
   /**
    * Callback après authentification PSC
    */
-  const handlePSCCallback = useCallback(async (code, state) => {
-    setLoading(true);
-    setError(null);
+  const handlePSCCallback = useCallback(
+    async (code, state) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const response = await api.post('/psc/callback', { code, state });
-      const { token: accessToken, refreshToken: refresh, user: userData } = response.data.data;
+      try {
+        const response = await api.post('/psc/callback', { code, state });
+        const { token: accessToken, refreshToken: refresh, user: userData } = response.data.data;
 
-      saveTokens(accessToken, refresh);
-      setUser(userData);
+        saveTokens(accessToken, refresh);
+        setUser(userData);
 
-      return { success: true, user: userData };
-    } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Erreur authentification PSC';
-      setError(errorMessage);
-      return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
-    }
-  }, [saveTokens]);
+        return { success: true, user: userData };
+      } catch (err) {
+        const errorMessage = err.response?.data?.error || 'Erreur authentification PSC';
+        setError(errorMessage);
+        return { success: false, error: errorMessage };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [saveTokens]
+  );
 
   /**
    * Changer le mot de passe
@@ -212,11 +223,18 @@ export const AuthProvider = ({ children }) => {
   /**
    * Vérifier les permissions de l'utilisateur
    */
-  const hasPermission = useCallback((permission) => {
-    if (!user) return false;
-    if (user.is_super_admin) return true;
-    return user.permissions?.includes(permission) || false;
-  }, [user]);
+  const hasPermission = useCallback(
+    permission => {
+      if (!user) {
+        return false;
+      }
+      if (user.is_super_admin) {
+        return true;
+      }
+      return user.permissions?.includes(permission) || false;
+    },
+    [user]
+  );
 
   /**
    * Vérifier si l'utilisateur est super admin
@@ -276,8 +294,8 @@ export const AuthProvider = ({ children }) => {
    */
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
-      (response) => response,
-      async (error) => {
+      response => response,
+      async error => {
         const originalRequest = error.config;
 
         if (error.response?.status === 401 && !originalRequest._retry) {
@@ -325,11 +343,7 @@ export const AuthProvider = ({ children }) => {
     isDomainAdmin
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 /**

@@ -39,20 +39,20 @@ const colorClasses = {
   }
 };
 
-const StatCard = ({ 
-  title, 
-  value, 
-  icon, 
-  trend, 
-  color = 'blue', 
-  link, 
+const StatCard = ({
+  title,
+  value,
+  icon,
+  trend,
+  color = 'blue',
+  link,
   subtitle,
   max,
   loading = false
 }) => {
   const colors = colorClasses[color] || colorClasses.blue;
 
-  const formatValue = (val) => {
+  const formatValue = val => {
     if (typeof val === 'number') {
       return val.toLocaleString('fr-FR');
     }
@@ -60,12 +60,13 @@ const StatCard = ({
   };
 
   const renderTrend = () => {
-    if (trend === undefined || trend === null) return null;
-    
+    if (trend === undefined || trend === null) {
+      return null;
+    }
     const isPositive = trend >= 0;
     const trendColor = isPositive ? 'text-green-600' : 'text-red-600';
     const arrow = isPositive ? '↗' : '↘';
-    
+
     return (
       <p className={`text-sm mt-2 ${trendColor} flex items-center gap-1`}>
         <span>{arrow}</span>
@@ -75,40 +76,37 @@ const StatCard = ({
   };
 
   const renderProgress = () => {
-    if (max === undefined) return null;
-    
+    if (max === undefined) {
+      return null;
+    }
     const percentage = Math.min((parseFloat(value) / max) * 100, 100);
-    
+
     return (
       <div className="mt-3">
         <div className="w-full bg-gray-200 rounded-full h-1.5">
-          <div 
+          <div
             className={`h-1.5 rounded-full ${colors.text.replace('text-', 'bg-')}`}
             style={{ width: `${percentage}%` }}
           />
         </div>
-        <p className="text-xs text-gray-500 mt-1">
-          sur {formatValue(max)}
-        </p>
+        <p className="text-xs text-gray-500 mt-1">sur {formatValue(max)}</p>
       </div>
     );
   };
 
   const cardContent = (
-    <div className={`bg-white rounded-lg shadow p-6 transition ${link ? 'hover:shadow-md cursor-pointer' : ''}`}>
+    <div
+      className={`bg-white rounded-lg shadow p-6 transition ${link ? 'hover:shadow-md cursor-pointer' : ''}`}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm text-gray-600 mb-1">{title}</p>
           {loading ? (
             <div className="h-9 w-24 bg-gray-200 animate-pulse rounded" />
           ) : (
-            <p className="text-3xl font-bold text-gray-900">
-              {formatValue(value)}
-            </p>
+            <p className="text-3xl font-bold text-gray-900">{formatValue(value)}</p>
           )}
-          {subtitle && (
-            <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
-          )}
+          {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
           {renderTrend()}
           {renderProgress()}
         </div>

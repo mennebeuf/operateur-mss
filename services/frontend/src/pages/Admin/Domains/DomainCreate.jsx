@@ -52,7 +52,7 @@ const DomainCreate = () => {
     }
 
     if (!formData.organization_name) {
-      newErrors.organization_name = 'Nom de l\'organisation requis';
+      newErrors.organization_name = "Nom de l'organisation requis";
     } else if (formData.organization_name.length < 2) {
       newErrors.organization_name = 'Minimum 2 caractères';
     }
@@ -61,7 +61,10 @@ const DomainCreate = () => {
       newErrors.contact_email = 'Email invalide';
     }
 
-    if (formData.contact_phone && !/^(\+33|0)[1-9](\d{2}){4}$/.test(formData.contact_phone.replace(/\s/g, ''))) {
+    if (
+      formData.contact_phone &&
+      !/^(\+33|0)[1-9](\d{2}){4}$/.test(formData.contact_phone.replace(/\s/g, ''))
+    ) {
       newErrors.contact_phone = 'Téléphone invalide';
     }
 
@@ -77,7 +80,7 @@ const DomainCreate = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -88,9 +91,11 @@ const DomainCreate = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
 
     setLoading(true);
     try {
@@ -98,7 +103,7 @@ const DomainCreate = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           domain_name: formData.domain_name,
@@ -121,10 +126,9 @@ const DomainCreate = () => {
         throw new Error(data.error || 'Erreur lors de la création');
       }
 
-      navigate(`/admin/domains/${data.data.id}`, { 
-        state: { message: 'Domaine créé avec succès', dnsRecords: data.data.requiredDnsRecords } 
+      navigate(`/admin/domains/${data.data.id}`, {
+        state: { message: 'Domaine créé avec succès', dnsRecords: data.data.requiredDnsRecords }
       });
-
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {
@@ -250,7 +254,9 @@ const DomainCreate = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               >
                 {organizationTypes.map(type => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -296,9 +302,7 @@ const DomainCreate = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Nombre maximum de BAL
-              </label>
+              <label className="block text-sm font-medium mb-1">Nombre maximum de BAL</label>
               <input
                 type="number"
                 name="max_mailboxes"
@@ -316,9 +320,7 @@ const DomainCreate = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Stockage maximum (GB)
-              </label>
+              <label className="block text-sm font-medium mb-1">Stockage maximum (GB)</label>
               <input
                 type="number"
                 name="max_storage_gb"

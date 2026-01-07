@@ -1,11 +1,13 @@
 // services/frontend/src/pages/Webmail/index.jsx
 import React, { useState, useEffect, useCallback } from 'react';
+
+import { emailApi } from '../../services/emailApi';
+
+import Compose from './Compose';
 import FolderTree from './FolderTree';
 import MessageList from './MessageList';
 import MessageView from './MessageView';
-import Compose from './Compose';
 import SearchBar from './SearchBar';
-import { emailApi } from '../../services/emailApi';
 
 const Webmail = () => {
   const [folders, setFolders] = useState([]);
@@ -29,18 +31,21 @@ const Webmail = () => {
   }, []);
 
   // Charger les messages
-  const loadMessages = useCallback(async (search = null) => {
-    setLoading(true);
-    try {
-      const data = await emailApi.getMessages(selectedFolder, page, 50, search);
-      setMessages(data.messages || []);
-      setTotal(data.total || 0);
-    } catch (error) {
-      console.error('Erreur chargement messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedFolder, page]);
+  const loadMessages = useCallback(
+    async (search = null) => {
+      setLoading(true);
+      try {
+        const data = await emailApi.getMessages(selectedFolder, page, 50, search);
+        setMessages(data.messages || []);
+        setTotal(data.total || 0);
+      } catch (error) {
+        console.error('Erreur chargement messages:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [selectedFolder, page]
+  );
 
   useEffect(() => {
     loadFolders();
@@ -51,17 +56,15 @@ const Webmail = () => {
   }, [loadMessages, searchQuery]);
 
   // Sélectionner un message (charger le contenu complet)
-  const handleSelectMessage = async (message) => {
+  const handleSelectMessage = async message => {
     try {
       const fullMessage = await emailApi.getMessage(message.uid, selectedFolder);
       setSelectedMessage(fullMessage);
       setIsComposing(false);
-      
+
       // Mettre à jour le flag "lu" dans la liste locale
       if (!message.isRead) {
-        setMessages(prev => prev.map(m => 
-          m.uid === message.uid ? { ...m, isRead: true } : m
-        ));
+        setMessages(prev => prev.map(m => (m.uid === message.uid ? { ...m, isRead: true } : m)));
       }
     } catch (error) {
       console.error('Erreur chargement message:', error);
@@ -81,13 +84,13 @@ const Webmail = () => {
   };
 
   // Transférer un message
-  const handleForward = (message) => {
+  const handleForward = message => {
     setSelectedMessage({ ...message, forward: true });
     setIsComposing(true);
   };
 
   // Supprimer des messages
-  const handleDelete = async (uids) => {
+  const handleDelete = async uids => {
     try {
       await emailApi.deleteMessages(selectedFolder, uids);
       setMessages(prev => prev.filter(m => !uids.includes(m.uid)));
@@ -107,13 +110,13 @@ const Webmail = () => {
   };
 
   // Recherche
-  const handleSearch = (query) => {
+  const handleSearch = query => {
     setSearchQuery(query);
     setPage(1);
   };
 
   // Sélection de dossier
-  const handleSelectFolder = (folder) => {
+  const handleSelectFolder = folder => {
     setSelectedFolder(folder);
     setSelectedMessage(null);
     setPage(1);
@@ -126,9 +129,7 @@ const Webmail = () => {
       await emailApi.setFlags(uid, selectedFolder, {
         [isRead ? 'remove' : 'add']: ['\\Seen']
       });
-      setMessages(prev => prev.map(m => 
-        m.uid === uid ? { ...m, isRead: !isRead } : m
-      ));
+      setMessages(prev => prev.map(m => (m.uid === uid ? { ...m, isRead: !isRead } : m)));
     } catch (error) {
       console.error('Erreur modification flag:', error);
     }
@@ -140,9 +141,7 @@ const Webmail = () => {
       await emailApi.setFlags(uid, selectedFolder, {
         [isFlagged ? 'remove' : 'add']: ['\\Flagged']
       });
-      setMessages(prev => prev.map(m => 
-        m.uid === uid ? { ...m, isFlagged: !isFlagged } : m
-      ));
+      setMessages(prev => prev.map(m => (m.uid === uid ? { ...m, isFlagged: !isFlagged } : m)));
     } catch (error) {
       console.error('Erreur modification flag:', error);
     }
@@ -153,10 +152,10 @@ const Webmail = () => {
       {/* Header */}
       <div className="bg-white border-b px-6 py-3 flex items-center justify-between">
         <h1 className="text-xl font-semibold text-gray-800">Messagerie MSSanté</h1>
-        
+
         <div className="flex items-center gap-4">
           <SearchBar onSearch={handleSearch} />
-          
+
           <button
             onClick={handleCompose}
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2 transition"
@@ -166,7 +165,7 @@ const Webmail = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Corps principal */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar - Dossiers */}
@@ -177,7 +176,7 @@ const Webmail = () => {
             onSelectFolder={handleSelectFolder}
           />
         </div>
-        
+
         {/* Liste des messages */}
         <div className="w-96 border-r overflow-y-auto bg-white">
           <MessageList
@@ -189,7 +188,7 @@ const Webmail = () => {
             onToggleFlag={handleToggleFlag}
             loading={loading}
           />
-          
+
           {/* Pagination */}
           {total > 50 && (
             <div className="p-4 border-t flex justify-between items-center bg-gray-50">
@@ -213,7 +212,7 @@ const Webmail = () => {
             </div>
           )}
         </div>
-        
+
         {/* Visualisation ou Composition */}
         <div className="flex-1 overflow-y-auto bg-white">
           {isComposing ? (

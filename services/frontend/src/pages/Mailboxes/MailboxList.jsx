@@ -1,20 +1,21 @@
 // services/frontend/src/pages/Mailboxes/MailboxList.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
+import Loader from '../../components/Common/Loader';
 import { useAuth } from '../../contexts/AuthContext';
 import { mailboxApi } from '../../services/mailboxApi';
-import Loader from '../../components/Common/Loader';
 
 const MailboxList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   // État
   const [mailboxes, setMailboxes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
-  
+
   // Filtres
   const [filters, setFilters] = useState({
     type: '',
@@ -27,14 +28,14 @@ const MailboxList = () => {
   const fetchMailboxes = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await mailboxApi.list({
         page: pagination.page,
         limit: pagination.limit,
         ...filters
       });
-      
+
       setMailboxes(response.data);
       setPagination(prev => ({
         ...prev,
@@ -54,7 +55,7 @@ const MailboxList = () => {
   }, [fetchMailboxes]);
 
   // Handlers
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     e.preventDefault();
     setFilters(prev => ({ ...prev, search: searchInput }));
     setPagination(prev => ({ ...prev, page: 1 }));
@@ -65,7 +66,7 @@ const MailboxList = () => {
     setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = newPage => {
     setPagination(prev => ({ ...prev, page: newPage }));
   };
 
@@ -73,7 +74,7 @@ const MailboxList = () => {
     if (!window.confirm(`Supprimer la BAL ${email} ? Cette action est irréversible.`)) {
       return;
     }
-    
+
     try {
       await mailboxApi.delete(id);
       fetchMailboxes();
@@ -84,7 +85,7 @@ const MailboxList = () => {
   };
 
   // Helpers
-  const getTypeLabel = (type) => {
+  const getTypeLabel = type => {
     const types = {
       personal: 'Personnelle',
       organizational: 'Organisationnelle',
@@ -96,7 +97,7 @@ const MailboxList = () => {
     return types[type] || type;
   };
 
-  const getTypeBadgeClass = (type) => {
+  const getTypeBadgeClass = type => {
     const classes = {
       personal: 'bg-blue-100 text-blue-800',
       organizational: 'bg-purple-100 text-purple-800',
@@ -108,7 +109,7 @@ const MailboxList = () => {
     return classes[type] || 'bg-gray-100 text-gray-800';
   };
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusBadgeClass = status => {
     const classes = {
       active: 'bg-green-100 text-green-800',
       inactive: 'bg-gray-100 text-gray-800',
@@ -118,7 +119,7 @@ const MailboxList = () => {
     return classes[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const getStatusLabel = (status) => {
+  const getStatusLabel = status => {
     const labels = {
       active: 'Active',
       inactive: 'Inactive',
@@ -171,12 +172,22 @@ const MailboxList = () => {
               <input
                 type="text"
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={e => setSearchInput(e.target.value)}
                 placeholder="Rechercher par email ou nom..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <svg className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
           </form>
@@ -184,7 +195,7 @@ const MailboxList = () => {
           {/* Filtre type */}
           <select
             value={filters.type}
-            onChange={(e) => handleFilterChange('type', e.target.value)}
+            onChange={e => handleFilterChange('type', e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les types</option>
@@ -196,7 +207,7 @@ const MailboxList = () => {
           {/* Filtre statut */}
           <select
             value={filters.status}
-            onChange={(e) => handleFilterChange('status', e.target.value)}
+            onChange={e => handleFilterChange('status', e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Tous les statuts</option>
@@ -212,7 +223,9 @@ const MailboxList = () => {
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
           {error}
-          <button onClick={fetchMailboxes} className="ml-4 underline">Réessayer</button>
+          <button onClick={fetchMailboxes} className="ml-4 underline">
+            Réessayer
+          </button>
         </div>
       )}
 
@@ -220,8 +233,18 @@ const MailboxList = () => {
       <div className="bg-white shadow rounded-lg overflow-hidden">
         {mailboxes.length === 0 ? (
           <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune boîte aux lettres</h3>
             <p className="mt-1 text-sm text-gray-500">Commencez par créer votre première BAL.</p>
@@ -260,7 +283,7 @@ const MailboxList = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {mailboxes.map((mailbox) => {
+                {mailboxes.map(mailbox => {
                   const quota = formatQuota(mailbox.usedMb || 0, mailbox.quotaMb || 1000);
                   return (
                     <tr key={mailbox.id} className="hover:bg-gray-50">
@@ -285,16 +308,22 @@ const MailboxList = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeBadgeClass(mailbox.type)}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTypeBadgeClass(mailbox.type)}`}
+                        >
                           {getTypeLabel(mailbox.type)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {mailbox.owner ? (
                           <div>
-                            <div>{mailbox.owner.firstName} {mailbox.owner.lastName}</div>
+                            <div>
+                              {mailbox.owner.firstName} {mailbox.owner.lastName}
+                            </div>
                             {mailbox.owner.rppsId && (
-                              <div className="text-xs text-gray-400">RPPS: {mailbox.owner.rppsId}</div>
+                              <div className="text-xs text-gray-400">
+                                RPPS: {mailbox.owner.rppsId}
+                              </div>
                             )}
                           </div>
                         ) : (
@@ -310,8 +339,11 @@ const MailboxList = () => {
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                               className={`h-2 rounded-full ${
-                                quota.percentage > 90 ? 'bg-red-500' :
-                                quota.percentage > 70 ? 'bg-yellow-500' : 'bg-green-500'
+                                quota.percentage > 90
+                                  ? 'bg-red-500'
+                                  : quota.percentage > 70
+                                    ? 'bg-yellow-500'
+                                    : 'bg-green-500'
                               }`}
                               style={{ width: `${Math.min(quota.percentage, 100)}%` }}
                             />
@@ -319,7 +351,9 @@ const MailboxList = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(mailbox.status)}`}>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(mailbox.status)}`}
+                        >
                           {getStatusLabel(mailbox.status)}
                         </span>
                       </td>
@@ -330,8 +364,18 @@ const MailboxList = () => {
                             className="text-blue-600 hover:text-blue-900"
                             title="Ouvrir le webmail"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                              />
                             </svg>
                           </Link>
                           <Link
@@ -339,9 +383,24 @@ const MailboxList = () => {
                             className="text-gray-600 hover:text-gray-900"
                             title="Paramètres"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
                             </svg>
                           </Link>
                           <button
@@ -349,8 +408,18 @@ const MailboxList = () => {
                             className="text-red-600 hover:text-red-900"
                             title="Supprimer"
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
                             </svg>
                           </button>
                         </div>
@@ -384,7 +453,8 @@ const MailboxList = () => {
                   <div>
                     <p className="text-sm text-gray-700">
                       Page <span className="font-medium">{pagination.page}</span> sur{' '}
-                      <span className="font-medium">{pagination.totalPages}</span> ({pagination.total} résultats)
+                      <span className="font-medium">{pagination.totalPages}</span> (
+                      {pagination.total} résultats)
                     </p>
                   </div>
                   <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
@@ -394,14 +464,18 @@ const MailboxList = () => {
                       className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                     >
                       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                        <path
+                          fillRule="evenodd"
+                          d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </button>
                     {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
-                      const pageNum = pagination.page <= 3 
-                        ? i + 1 
-                        : pagination.page + i - 2;
-                      if (pageNum > pagination.totalPages || pageNum < 1) return null;
+                      const pageNum = pagination.page <= 3 ? i + 1 : pagination.page + i - 2;
+                      if (pageNum > pagination.totalPages || pageNum < 1) {
+                        return null;
+                      }
                       return (
                         <button
                           key={pageNum}
@@ -422,7 +496,11 @@ const MailboxList = () => {
                       className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                     >
                       <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                        <path
+                          fillRule="evenodd"
+                          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </button>
                   </nav>

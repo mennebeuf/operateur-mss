@@ -1,7 +1,7 @@
 /**
  * MSSanté Frontend - Configuration des Routes
  * services/frontend/src/routes.jsx
- * 
+ *
  * Définition de toutes les routes de l'application
  * avec lazy loading et protection des routes
  */
@@ -9,14 +9,13 @@
 import React, { lazy } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
+// Guards
+import AdminRoute from './components/Common/AdminRoute';
+import ProtectedRoute from './components/Common/ProtectedRoute';
 // Layouts
-import MainLayout from './layouts/MainLayout';
 import AdminLayout from './layouts/AdminLayout';
 import AuthLayout from './layouts/AuthLayout';
-
-// Guards
-import ProtectedRoute from './components/Common/ProtectedRoute';
-import AdminRoute from './components/Common/AdminRoute';
+import MainLayout from './layouts/MainLayout';
 
 // ============================================
 // LAZY LOADING DES PAGES
@@ -78,24 +77,24 @@ const routes = [
     children: [
       {
         path: 'login',
-        element: <Login />,
+        element: <Login />
       },
       {
         path: 'psc/callback',
-        element: <PSCCallback />,
+        element: <PSCCallback />
       },
       {
         // Redirection par défaut
         index: true,
-        element: <Navigate to="/auth/login" replace />,
-      },
-    ],
+        element: <Navigate to="/auth/login" replace />
+      }
+    ]
   },
 
   // Alias pour /login
   {
     path: '/login',
-    element: <Navigate to="/auth/login" replace />,
+    element: <Navigate to="/auth/login" replace />
   },
 
   // ==========================================
@@ -112,29 +111,29 @@ const routes = [
       // Dashboard (page d'accueil)
       {
         index: true,
-        element: <Navigate to="/dashboard" replace />,
+        element: <Navigate to="/dashboard" replace />
       },
       {
         path: 'dashboard',
-        element: <Dashboard />,
+        element: <Dashboard />
       },
 
       // Webmail
       {
         path: 'webmail',
-        element: <Webmail />,
+        element: <Webmail />
       },
       {
         path: 'webmail/:folder',
-        element: <Webmail />,
+        element: <Webmail />
       },
       {
         path: 'webmail/:folder/:messageId',
-        element: <Webmail />,
+        element: <Webmail />
       },
       {
         path: 'webmail/compose',
-        element: <Webmail />,
+        element: <Webmail />
       },
 
       // Gestion des boîtes aux lettres
@@ -144,39 +143,43 @@ const routes = [
         children: [
           {
             index: true,
-            element: <MailboxList />,
+            element: <MailboxList />
           },
           {
             path: 'new',
-            element: <MailboxCreate />,
+            element: <MailboxCreate />
           },
           {
             path: ':mailboxId/settings',
-            element: <MailboxSettings />,
-          },
-        ],
+            element: <MailboxSettings />
+          }
+        ]
       },
 
       // Profil utilisateur
       {
         path: 'profile',
-        element: lazy(() => import('./pages/Profile'))
-          ? <React.Suspense fallback={null}>
-              {React.createElement(lazy(() => import('./pages/Profile')))}
-            </React.Suspense>
-          : <Navigate to="/dashboard" />,
+        element: lazy(() => import('./pages/Profile')) ? (
+          <React.Suspense fallback={null}>
+            {React.createElement(lazy(() => import('./pages/Profile')))}
+          </React.Suspense>
+        ) : (
+          <Navigate to="/dashboard" />
+        )
       },
 
       // Paramètres
       {
         path: 'settings',
-        element: lazy(() => import('./pages/Settings'))
-          ? <React.Suspense fallback={null}>
-              {React.createElement(lazy(() => import('./pages/Settings')))}
-            </React.Suspense>
-          : <Navigate to="/dashboard" />,
-      },
-    ],
+        element: lazy(() => import('./pages/Settings')) ? (
+          <React.Suspense fallback={null}>
+            {React.createElement(lazy(() => import('./pages/Settings')))}
+          </React.Suspense>
+        ) : (
+          <Navigate to="/dashboard" />
+        )
+      }
+    ]
   },
 
   // ==========================================
@@ -193,7 +196,7 @@ const routes = [
       // Dashboard Admin
       {
         index: true,
-        element: <AdminDashboard />,
+        element: <AdminDashboard />
       },
 
       // Gestion des domaines (Super Admin uniquement)
@@ -203,21 +206,21 @@ const routes = [
         children: [
           {
             index: true,
-            element: <DomainsList />,
+            element: <DomainsList />
           },
           {
             path: 'new',
-            element: <DomainCreate />,
+            element: <DomainCreate />
           },
           {
             path: ':domainId',
-            element: <DomainView />,
+            element: <DomainView />
           },
           {
             path: ':domainId/edit',
-            element: <DomainEdit />,
-          },
-        ],
+            element: <DomainEdit />
+          }
+        ]
       },
 
       // Gestion des utilisateurs
@@ -227,17 +230,17 @@ const routes = [
         children: [
           {
             index: true,
-            element: <UsersList />,
+            element: <UsersList />
           },
           {
             path: 'new',
-            element: <UserCreate />,
+            element: <UserCreate />
           },
           {
             path: ':userId/edit',
-            element: <UserEdit />,
-          },
-        ],
+            element: <UserEdit />
+          }
+        ]
       },
 
       // Gestion des certificats
@@ -247,17 +250,17 @@ const routes = [
         children: [
           {
             index: true,
-            element: <CertificatesList />,
+            element: <CertificatesList />
           },
           {
             path: 'upload',
-            element: <CertificateUpload />,
+            element: <CertificateUpload />
           },
           {
             path: ':certId/renew',
-            element: <CertificateUpload />,
-          },
-        ],
+            element: <CertificateUpload />
+          }
+        ]
       },
 
       // Annuaire ANS
@@ -267,51 +270,55 @@ const routes = [
         children: [
           {
             index: true,
-            element: <AnnuaireReports />,
+            element: <AnnuaireReports />
           },
           {
             path: 'reports',
-            element: <AnnuaireReports />,
+            element: <AnnuaireReports />
           },
           {
             path: 'indicators',
-            element: <MonthlyIndicators />,
-          },
-        ],
+            element: <MonthlyIndicators />
+          }
+        ]
       },
 
       // Statistiques
       {
         path: 'statistics',
-        element: <GlobalStats />,
+        element: <GlobalStats />
       },
 
       // Monitoring
       {
         path: 'monitoring',
-        element: <SystemHealth />,
+        element: <SystemHealth />
       },
 
       // Logs d'audit
       {
         path: 'audit',
-        element: lazy(() => import('./pages/Admin/Audit/AuditLogs'))
-          ? <React.Suspense fallback={null}>
-              {React.createElement(lazy(() => import('./pages/Admin/Audit/AuditLogs')))}
-            </React.Suspense>
-          : <Navigate to="/admin" />,
+        element: lazy(() => import('./pages/Admin/Audit/AuditLogs')) ? (
+          <React.Suspense fallback={null}>
+            {React.createElement(lazy(() => import('./pages/Admin/Audit/AuditLogs')))}
+          </React.Suspense>
+        ) : (
+          <Navigate to="/admin" />
+        )
       },
 
       // Paramètres système
       {
         path: 'settings',
-        element: lazy(() => import('./pages/Admin/Settings/SystemSettings'))
-          ? <React.Suspense fallback={null}>
-              {React.createElement(lazy(() => import('./pages/Admin/Settings/SystemSettings')))}
-            </React.Suspense>
-          : <Navigate to="/admin" />,
-      },
-    ],
+        element: lazy(() => import('./pages/Admin/Settings/SystemSettings')) ? (
+          <React.Suspense fallback={null}>
+            {React.createElement(lazy(() => import('./pages/Admin/Settings/SystemSettings')))}
+          </React.Suspense>
+        ) : (
+          <Navigate to="/admin" />
+        )
+      }
+    ]
   },
 
   // ==========================================
@@ -319,12 +326,12 @@ const routes = [
   // ==========================================
   {
     path: '/404',
-    element: <NotFound />,
+    element: <NotFound />
   },
   {
     path: '*',
-    element: <Navigate to="/404" replace />,
-  },
+    element: <Navigate to="/404" replace />
+  }
 ];
 
 export default routes;

@@ -34,11 +34,11 @@ const CertificatesList = () => {
 
       const response = await fetch(`/api/v1/certificates?${params}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setCertificates(data.data.certificates);
         setPagination(prev => ({
@@ -54,7 +54,7 @@ const CertificatesList = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = status => {
     const styles = {
       active: 'bg-green-100 text-green-800',
       expired: 'bg-red-100 text-red-800',
@@ -74,7 +74,7 @@ const CertificatesList = () => {
     );
   };
 
-  const getTypeBadge = (type) => {
+  const getTypeBadge = type => {
     const labels = {
       SERV_SSL: 'Serveur SSL',
       ORG_AUTH_CLI: 'Auth. Client Org.',
@@ -84,7 +84,7 @@ const CertificatesList = () => {
     return labels[type] || type;
   };
 
-  const getExpirationStatus = (daysRemaining) => {
+  const getExpirationStatus = daysRemaining => {
     if (daysRemaining < 0) {
       return <span className="text-red-600 font-semibold">Expiré</span>;
     }
@@ -97,8 +97,10 @@ const CertificatesList = () => {
     return <span className="text-green-600">{daysRemaining} jours</span>;
   };
 
-  const handleRevoke = async (certId) => {
-    if (!confirm('Êtes-vous sûr de vouloir révoquer ce certificat ? Cette action est irréversible.')) {
+  const handleRevoke = async certId => {
+    if (
+      !confirm('Êtes-vous sûr de vouloir révoquer ce certificat ? Cette action est irréversible.')
+    ) {
       return;
     }
 
@@ -107,7 +109,7 @@ const CertificatesList = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({ reason: 'cessationOfOperation' })
       });
@@ -150,7 +152,7 @@ const CertificatesList = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
             <select
               value={filters.type}
-              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+              onChange={e => setFilters({ ...filters, type: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
             >
               <option value="">Tous les types</option>
@@ -164,7 +166,7 @@ const CertificatesList = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
             <select
               value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              onChange={e => setFilters({ ...filters, status: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
             >
               <option value="">Tous les statuts</option>
@@ -178,7 +180,7 @@ const CertificatesList = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Expiration</label>
             <select
               value={filters.expiringDays}
-              onChange={(e) => setFilters({ ...filters, expiringDays: e.target.value })}
+              onChange={e => setFilters({ ...filters, expiringDays: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
             >
               <option value="">Toutes les dates</option>
@@ -204,12 +206,10 @@ const CertificatesList = () => {
           <div className="flex">
             <span className="text-2xl mr-3">⚠️</span>
             <div>
-              <h3 className="text-sm font-medium text-yellow-800">
-                Certificats expirant bientôt
-              </h3>
+              <h3 className="text-sm font-medium text-yellow-800">Certificats expirant bientôt</h3>
               <p className="text-sm text-yellow-700 mt-1">
-                {certificates.filter(c => c.daysRemaining <= 30 && c.status === 'active').length} certificat(s) 
-                expire(nt) dans les 30 prochains jours. Pensez à les renouveler.
+                {certificates.filter(c => c.daysRemaining <= 30 && c.status === 'active').length}{' '}
+                certificat(s) expire(nt) dans les 30 prochains jours. Pensez à les renouveler.
               </p>
             </div>
           </div>
@@ -242,7 +242,7 @@ const CertificatesList = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {certificates.map((cert) => (
+            {certificates.map(cert => (
               <tr key={cert.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4">
                   <div className="flex items-center">
@@ -260,9 +260,7 @@ const CertificatesList = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="text-sm text-gray-900">{getTypeBadge(cert.type)}</span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getStatusBadge(cert.status)}
-                </td>
+                <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(cert.status)}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div>{new Date(cert.validFrom).toLocaleDateString('fr-FR')}</div>
                   <div>→ {new Date(cert.validTo).toLocaleDateString('fr-FR')}</div>

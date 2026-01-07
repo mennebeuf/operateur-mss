@@ -5,7 +5,7 @@ const sizes = {
   sm: 'h-4 w-4',
   md: 'h-8 w-8',
   lg: 'h-12 w-12',
-  xl: 'h-16 w-16',
+  xl: 'h-16 w-16'
 };
 
 const colors = {
@@ -13,7 +13,7 @@ const colors = {
   secondary: 'text-gray-600',
   white: 'text-white',
   success: 'text-green-600',
-  danger: 'text-red-600',
+  danger: 'text-red-600'
 };
 
 // Spinner classique
@@ -28,14 +28,7 @@ const Spinner = ({ size = 'md', color = 'primary', className = '' }) => {
       fill="none"
       viewBox="0 0 24 24"
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
         fill="currentColor"
@@ -52,24 +45,18 @@ const Loader = ({
   text,
   fullScreen = false,
   overlay = false,
-  className = '',
+  className = ''
 }) => {
   const content = (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
       <Spinner size={size} color={color} />
-      {text && (
-        <p className={`text-sm font-medium ${colors[color] || colors.primary}`}>
-          {text}
-        </p>
-      )}
+      {text && <p className={`text-sm font-medium ${colors[color] || colors.primary}`}>{text}</p>}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
-        {content}
-      </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">{content}</div>
     );
   }
 
@@ -90,12 +77,7 @@ export const InlineLoader = ({ size = 'sm', color = 'white', className = '' }) =
 );
 
 // Skeleton loader pour le contenu
-export const Skeleton = ({
-  width = 'full',
-  height = '4',
-  rounded = 'md',
-  className = '',
-}) => {
+export const Skeleton = ({ width = 'full', height = '4', rounded = 'md', className = '' }) => {
   const widthClasses = width === 'full' ? 'w-full' : `w-${width}`;
   const heightClasses = `h-${height}`;
   const roundedClasses = `rounded-${rounded}`;
@@ -146,10 +128,10 @@ export const PageLoader = ({ text = 'Chargement...', showLogo = true }) => (
 // Dots loader (alternative)
 export const DotsLoader = ({ color = 'primary', className = '' }) => {
   const colorClasses = colors[color] || colors.primary;
-  
+
   return (
     <div className={`flex space-x-1 ${className}`}>
-      {[0, 1, 2].map((i) => (
+      {[0, 1, 2].map(i => (
         <div
           key={i}
           className={`w-2 h-2 rounded-full ${colorClasses} animate-bounce`}

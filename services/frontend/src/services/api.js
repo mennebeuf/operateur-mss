@@ -9,26 +9,26 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
-  },
+    'Content-Type': 'application/json'
+  }
 });
 
 // Intercepteur pour ajouter le token d'authentification
 api.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  error => Promise.reject(error)
 );
 
 // Intercepteur pour gérer les réponses et erreurs
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
 
     // Gestion du refresh token si 401
@@ -39,7 +39,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-            refreshToken,
+            refreshToken
           });
 
           const { token, refreshToken: newRefreshToken } = response.data;
@@ -63,7 +63,7 @@ api.interceptors.response.use(
       console.error('Erreur réseau:', error.message);
       return Promise.reject({
         message: 'Erreur de connexion au serveur',
-        code: 'NETWORK_ERROR',
+        code: 'NETWORK_ERROR'
       });
     }
 
@@ -72,7 +72,7 @@ api.interceptors.response.use(
       status: error.response.status,
       message: error.response.data?.error || error.response.data?.message || 'Erreur serveur',
       code: error.response.data?.code || 'UNKNOWN_ERROR',
-      details: error.response.data?.details,
+      details: error.response.data?.details
     };
 
     return Promise.reject(apiError);
@@ -81,7 +81,7 @@ api.interceptors.response.use(
 
 // Méthodes utilitaires
 export const getAuthHeaders = () => ({
-  Authorization: `Bearer ${localStorage.getItem('token')}`,
+  Authorization: `Bearer ${localStorage.getItem('token')}`
 });
 
 export const setTokens = (token, refreshToken) => {

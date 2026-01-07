@@ -38,10 +38,10 @@ const DomainEdit = () => {
   const loadDomain = async () => {
     try {
       const response = await fetch(`/api/v1/admin/domains/${id}`, {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
-      
+
       if (data.success) {
         const domain = data.data;
         setOriginalData(domain);
@@ -73,7 +73,10 @@ const DomainEdit = () => {
       newErrors.contact_email = 'Email invalide';
     }
 
-    if (formData.contact_phone && !/^(\+33|0)[1-9](\d{2}){4}$/.test(formData.contact_phone.replace(/\s/g, ''))) {
+    if (
+      formData.contact_phone &&
+      !/^(\+33|0)[1-9](\d{2}){4}$/.test(formData.contact_phone.replace(/\s/g, ''))
+    ) {
       newErrors.contact_phone = 'Téléphone invalide';
     }
 
@@ -89,7 +92,7 @@ const DomainEdit = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -97,9 +100,11 @@ const DomainEdit = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
 
     setSaving(true);
     try {
@@ -107,7 +112,7 @@ const DomainEdit = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify({
           organizationName: formData.organization_name,
@@ -131,7 +136,6 @@ const DomainEdit = () => {
       }
 
       navigate(`/admin/domains/${id}`, { state: { message: 'Domaine mis à jour avec succès' } });
-
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {
@@ -151,7 +155,10 @@ const DomainEdit = () => {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold text-gray-700">Domaine non trouvé</h2>
-        <button onClick={() => navigate('/admin/domains')} className="mt-4 text-blue-600 hover:underline">
+        <button
+          onClick={() => navigate('/admin/domains')}
+          className="mt-4 text-blue-600 hover:underline"
+        >
           Retour à la liste
         </button>
       </div>
@@ -215,7 +222,9 @@ const DomainEdit = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
               >
                 {organizationTypes.map(type => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -326,7 +335,9 @@ const DomainEdit = () => {
             </div>
             <div>
               <span className="text-gray-500">Créé le :</span>{' '}
-              <span className="font-medium">{new Date(originalData.created_at).toLocaleDateString('fr-FR')}</span>
+              <span className="font-medium">
+                {new Date(originalData.created_at).toLocaleDateString('fr-FR')}
+              </span>
             </div>
             <div>
               <span className="text-gray-500">DNS vérifié :</span>{' '}

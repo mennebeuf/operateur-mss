@@ -1,6 +1,7 @@
 // services/frontend/src/layouts/MainLayout.jsx
 import React, { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+
 import { useAuth } from '../contexts/AuthContext';
 
 const MainLayout = () => {
@@ -15,7 +16,7 @@ const MainLayout = () => {
     { path: '/webmail', label: 'Webmail', icon: '📧' },
     { path: '/mailboxes', label: 'Mes BAL', icon: '📬' },
     { path: '/contacts', label: 'Contacts', icon: '👥' },
-    { path: '/settings', label: 'Paramètres', icon: '⚙️' },
+    { path: '/settings', label: 'Paramètres', icon: '⚙️' }
   ];
 
   const handleLogout = async () => {
@@ -23,7 +24,7 @@ const MainLayout = () => {
     navigate('/login');
   };
 
-  const isActive = (path) => location.pathname.startsWith(path);
+  const isActive = path => location.pathname.startsWith(path);
 
   return (
     <div className="min-h-screen flex bg-gray-100">
@@ -56,7 +57,7 @@ const MainLayout = () => {
         {/* Navigation */}
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
-            {menuItems.map((item) => (
+            {menuItems.map(item => (
               <li key={item.path}>
                 <Link
                   to={item.path}
@@ -96,7 +97,8 @@ const MainLayout = () => {
           {sidebarOpen ? (
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
+                {user?.first_name?.[0]}
+                {user?.last_name?.[0]}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
@@ -108,7 +110,8 @@ const MainLayout = () => {
           ) : (
             <div className="flex justify-center">
               <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
+                {user?.first_name?.[0]}
+                {user?.last_name?.[0]}
               </div>
             </div>
           )}
@@ -121,7 +124,7 @@ const MainLayout = () => {
         <header className="h-16 bg-white shadow-sm flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <h1 className="text-xl font-semibold text-gray-800">
-              {menuItems.find((item) => isActive(item.path))?.label || 'MSSanté'}
+              {menuItems.find(item => isActive(item.path))?.label || 'MSSanté'}
             </h1>
           </div>
 
@@ -139,7 +142,8 @@ const MainLayout = () => {
                 className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg"
               >
                 <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                  {user?.first_name?.[0]}{user?.last_name?.[0]}
+                  {user?.first_name?.[0]}
+                  {user?.last_name?.[0]}
                 </div>
                 <span className="text-sm text-gray-700">{user?.first_name}</span>
                 <span className="text-xs">▼</span>
@@ -148,7 +152,9 @@ const MainLayout = () => {
               {userMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
                   <div className="p-3 border-b">
-                    <p className="text-sm font-medium">{user?.first_name} {user?.last_name}</p>
+                    <p className="text-sm font-medium">
+                      {user?.first_name} {user?.last_name}
+                    </p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
                     {user?.rpps_id && (
                       <p className="text-xs text-gray-400 mt-1">RPPS: {user.rpps_id}</p>
@@ -196,10 +202,7 @@ const MainLayout = () => {
 
       {/* Overlay pour fermer le menu user */}
       {userMenuOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setUserMenuOpen(false)}
-        />
+        <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
       )}
     </div>
   );

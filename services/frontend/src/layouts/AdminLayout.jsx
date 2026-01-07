@@ -1,6 +1,7 @@
 // services/frontend/src/layouts/AdminLayout.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+
 import { useAuth } from '../contexts/AuthContext';
 
 const AdminLayout = () => {
@@ -31,9 +32,9 @@ const AdminLayout = () => {
               { path: '/admin/statistics', label: 'Statistiques', icon: '📈' },
               { path: '/admin/monitoring', label: 'Monitoring', icon: '🖥️' },
               { path: '/admin/audit', label: 'Audit', icon: '📋' },
-              { path: '/admin/settings', label: 'Configuration', icon: '⚙️' },
-            ],
-          },
+              { path: '/admin/settings', label: 'Configuration', icon: '⚙️' }
+            ]
+          }
         ]
       : []),
     // Admin domaine
@@ -45,19 +46,19 @@ const AdminLayout = () => {
               { path: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
               { path: '/admin/domain-users', label: 'Utilisateurs', icon: '👥' },
               { path: '/admin/domain-mailboxes', label: 'BAL', icon: '📬' },
-              { path: '/admin/domain-stats', label: 'Statistiques', icon: '📈' },
-            ],
-          },
+              { path: '/admin/domain-stats', label: 'Statistiques', icon: '📈' }
+            ]
+          }
         ]
-      : []),
+      : [])
   ];
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = path => location.pathname === path;
 
   const getCurrentPageTitle = () => {
     for (const section of menuItems) {
-      const item = section.items.find((i) => isActive(i.path));
-      if (item) return item.label;
+      const item = section.items.find(i => isActive(i.path));
+      if (item) {return item.label;}
     }
     return 'Administration';
   };
@@ -105,7 +106,7 @@ const AdminLayout = () => {
                 </h3>
               )}
               <ul className="space-y-1">
-                {section.items.map((item) => (
+                {section.items.map(item => (
                   <li key={item.path}>
                     <Link
                       to={item.path}
@@ -143,7 +144,8 @@ const AdminLayout = () => {
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                  {user?.first_name?.[0]}{user?.last_name?.[0]}
+                  {user?.first_name?.[0]}
+                  {user?.last_name?.[0]}
                 </div>
                 <div>
                   <div className="text-sm font-medium text-white">
@@ -167,7 +169,8 @@ const AdminLayout = () => {
           ) : (
             <div className="flex flex-col items-center gap-2">
               <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
+                {user?.first_name?.[0]}
+                {user?.last_name?.[0]}
               </div>
               <button
                 onClick={handleLogout}

@@ -29,9 +29,11 @@ const AlertsBanner = ({ alerts }) => {
 
   const visibleAlerts = alerts.filter(a => !dismissed.includes(a.id));
 
-  if (visibleAlerts.length === 0) return null;
+  if (visibleAlerts.length === 0) {
+    return null;
+  }
 
-  const handleDismiss = (alertId) => {
+  const handleDismiss = alertId => {
     setDismissed([...dismissed, alertId]);
   };
 
@@ -41,33 +43,33 @@ const AlertsBanner = ({ alerts }) => {
   const infoAlerts = visibleAlerts.filter(a => a.level === 'info');
 
   const renderAlertGroup = (alertGroup, level) => {
-    if (alertGroup.length === 0) return null;
-    
+    if (alertGroup.length === 0) {
+      return null;
+    }
+
     const style = alertStyles[level] || alertStyles.info;
-    
+
     return (
       <div className={`${style.bg} border-l-4 ${style.border} p-4 rounded-r-lg`}>
         <div className="flex items-start">
           <span className="text-xl mr-3">{style.icon}</span>
           <div className="flex-1">
             <h3 className={`text-sm font-medium ${style.text}`}>
-              {alertGroup.length} alerte{alertGroup.length > 1 ? 's' : ''} {
-                level === 'critical' ? 'critique(s)' : 
-                level === 'warning' ? 'à traiter' : 
-                'informative(s)'
-              }
+              {alertGroup.length} alerte{alertGroup.length > 1 ? 's' : ''}{' '}
+              {level === 'critical'
+                ? 'critique(s)'
+                : level === 'warning'
+                  ? 'à traiter'
+                  : 'informative(s)'}
             </h3>
             <div className={`mt-2 text-sm ${style.text}`}>
               <ul className="space-y-1">
-                {alertGroup.map((alert) => (
+                {alertGroup.map(alert => (
                   <li key={alert.id} className="flex items-center justify-between">
                     <span>{alert.message}</span>
                     <div className="flex items-center gap-2 ml-4">
                       {alert.link && (
-                        <Link 
-                          to={alert.link}
-                          className="text-xs underline hover:no-underline"
-                        >
+                        <Link to={alert.link} className="text-xs underline hover:no-underline">
                           Voir
                         </Link>
                       )}

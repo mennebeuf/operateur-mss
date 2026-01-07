@@ -5,15 +5,17 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+
+import StatCard from '../../components/Admin/StatCard';
+import Loader from '../../components/Common/Loader';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDomain } from '../../contexts/DomainContext';
-import { getDomainStats, getRecentActivity } from '../../services/api';
-import StatCard from '../../components/Admin/StatCard';
-import MessagesChart from './components/MessagesChart';
-import RecentActivity from './components/RecentActivity';
-import QuotaProgress from './components/QuotaProgress';
+import { getDomainStats, getRecentActivity } from '../../services/dashboardApi';
+
 import AlertsBanner from './components/AlertsBanner';
-import Loader from '../../components/Common/Loader';
+import MessagesChart from './components/MessagesChart';
+import QuotaProgress from './components/QuotaProgress';
+import RecentActivity from './components/RecentActivity';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -25,17 +27,17 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
 
   const loadDashboardData = useCallback(async () => {
-    if (!selectedDomain?.id) return;
-    
+    if (!selectedDomain?.id) {return;}
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const [statsData, activityData] = await Promise.all([
         getDomainStats(selectedDomain.id),
         getRecentActivity(selectedDomain.id, 10)
       ]);
-      
+
       setStats(statsData);
       setActivity(activityData.activities || []);
       setAlerts(statsData.alerts || []);
@@ -77,7 +79,7 @@ const Dashboard = () => {
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700">{error}</p>
-          <button 
+          <button
             onClick={loadDashboardData}
             className="mt-2 text-red-600 hover:text-red-800 underline"
           >
@@ -96,18 +98,16 @@ const Dashboard = () => {
           <h1 className="text-2xl font-bold text-gray-900">
             Dashboard - {selectedDomain.organization_name}
           </h1>
-          <p className="text-gray-500 mt-1">
-            Bienvenue, {user?.first_name || user?.email}
-          </p>
+          <p className="text-gray-500 mt-1">Bienvenue, {user?.first_name || user?.email}</p>
         </div>
         <div className="mt-4 md:mt-0 flex gap-3">
-          <Link 
+          <Link
             to="/mailboxes/create"
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
             + Nouvelle BAL
           </Link>
-          <button 
+          <button
             onClick={loadDashboardData}
             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
             disabled={loading}
@@ -181,14 +181,8 @@ const Dashboard = () => {
 
       {/* Graphiques et activité */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <MessagesChart 
-          domainId={selectedDomain.id} 
-          data={stats?.messages_by_day || []}
-        />
-        <RecentActivity 
-          activities={activity}
-          domainId={selectedDomain.id}
-        />
+        <MessagesChart domainId={selectedDomain.id} data={stats?.messages_by_day || []} />
+        <RecentActivity activities={activity} domainId={selectedDomain.id} />
       </div>
 
       {/* Informations du domaine */}
@@ -206,11 +200,13 @@ const Dashboard = () => {
           <div>
             <span className="text-gray-500">Statut:</span>
             <p className="font-medium">
-              <span className={`inline-flex px-2 py-1 rounded-full text-xs ${
-                selectedDomain.status === 'active' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-yellow-100 text-yellow-800'
-              }`}>
+              <span
+                className={`inline-flex px-2 py-1 rounded-full text-xs ${
+                  selectedDomain.status === 'active'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}
+              >
                 {selectedDomain.status === 'active' ? 'Actif' : selectedDomain.status}
               </span>
             </p>
@@ -218,10 +214,9 @@ const Dashboard = () => {
           <div>
             <span className="text-gray-500">Certificat expire le:</span>
             <p className="font-medium">
-              {stats?.certificate_expiry 
+              {stats?.certificate_expiry
                 ? new Date(stats.certificate_expiry).toLocaleDateString('fr-FR')
-                : '-'
-              }
+                : '-'}
             </p>
           </div>
         </div>

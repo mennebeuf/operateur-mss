@@ -1,14 +1,15 @@
 // services/frontend/src/pages/Mailboxes/MailboxCreate.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import Loader from '../../components/Common/Loader';
 import { useAuth } from '../../contexts/AuthContext';
 import { mailboxApi } from '../../services/mailboxApi';
-import Loader from '../../components/Common/Loader';
 
 const MailboxCreate = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   // État du formulaire
   const [formData, setFormData] = useState({
     type: 'personal',
@@ -28,7 +29,7 @@ const MailboxCreate = () => {
     autoReply: false,
     autoReplyMessage: ''
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [domainSuffix, setDomainSuffix] = useState('');
@@ -44,11 +45,11 @@ const MailboxCreate = () => {
   // Validation en temps réel
   const validateField = (name, value) => {
     const newErrors = { ...errors };
-    
+
     switch (name) {
       case 'localPart':
         if (!value) {
-          newErrors.localPart = 'L\'adresse est requise';
+          newErrors.localPart = "L'adresse est requise";
         } else if (!/^[a-z0-9._-]+$/i.test(value)) {
           newErrors.localPart = 'Caractères autorisés : lettres, chiffres, ., _, -';
         } else if (value.length < 3) {
@@ -57,7 +58,7 @@ const MailboxCreate = () => {
           delete newErrors.localPart;
         }
         break;
-        
+
       case 'firstName':
         if (formData.type === 'personal' && !value) {
           newErrors.firstName = 'Le prénom est requis';
@@ -65,7 +66,7 @@ const MailboxCreate = () => {
           delete newErrors.firstName;
         }
         break;
-        
+
       case 'lastName':
         if (formData.type === 'personal' && !value) {
           newErrors.lastName = 'Le nom est requis';
@@ -73,7 +74,7 @@ const MailboxCreate = () => {
           delete newErrors.lastName;
         }
         break;
-        
+
       case 'rppsId':
         if (formData.type === 'personal' && value && !/^\d{11}$/.test(value)) {
           newErrors.rppsId = 'Le RPPS doit contenir 11 chiffres';
@@ -81,7 +82,7 @@ const MailboxCreate = () => {
           delete newErrors.rppsId;
         }
         break;
-        
+
       case 'serviceName':
         if (formData.type === 'organizational' && !value) {
           newErrors.serviceName = 'Le nom du service est requis';
@@ -89,39 +90,39 @@ const MailboxCreate = () => {
           delete newErrors.serviceName;
         }
         break;
-        
+
       case 'applicationName':
         if (formData.type === 'applicative' && !value) {
-          newErrors.applicationName = 'Le nom de l\'application est requis';
+          newErrors.applicationName = "Le nom de l'application est requis";
         } else {
           delete newErrors.applicationName;
         }
         break;
-        
+
       default:
         break;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   // Gestionnaire de changement
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value, type, checked } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: newValue
     }));
-    
+
     // Valider le champ modifié
     validateField(name, newValue);
   };
 
   // Changement de type de BAL
-  const handleTypeChange = (newType) => {
+  const handleTypeChange = newType => {
     setFormData(prev => ({
       ...prev,
       type: newType,
@@ -141,7 +142,7 @@ const MailboxCreate = () => {
   // Génération automatique de l'adresse
   const generateLocalPart = () => {
     let suggested = '';
-    
+
     if (formData.type === 'personal') {
       if (formData.firstName && formData.lastName) {
         suggested = `${formData.firstName.toLowerCase()}.${formData.lastName.toLowerCase()}`
@@ -167,7 +168,7 @@ const MailboxCreate = () => {
           .replace(/-+/g, '-');
       }
     }
-    
+
     if (suggested) {
       setFormData(prev => ({ ...prev, localPart: suggested }));
     }
@@ -176,51 +177,59 @@ const MailboxCreate = () => {
   // Validation complète du formulaire
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Champs communs
     if (!formData.localPart) {
-      newErrors.localPart = 'L\'adresse est requise';
+      newErrors.localPart = "L'adresse est requise";
     } else if (!/^[a-z0-9._-]+$/i.test(formData.localPart)) {
       newErrors.localPart = 'Caractères autorisés : lettres, chiffres, ., _, -';
     }
-    
+
     // Champs spécifiques par type
     if (formData.type === 'personal') {
-      if (!formData.firstName) newErrors.firstName = 'Le prénom est requis';
-      if (!formData.lastName) newErrors.lastName = 'Le nom est requis';
+      if (!formData.firstName) {
+        newErrors.firstName = 'Le prénom est requis';
+      }
+      if (!formData.lastName) {
+        newErrors.lastName = 'Le nom est requis';
+      }
       if (formData.rppsId && !/^\d{11}$/.test(formData.rppsId)) {
         newErrors.rppsId = 'Le RPPS doit contenir 11 chiffres';
       }
     } else if (formData.type === 'organizational') {
-      if (!formData.serviceName) newErrors.serviceName = 'Le nom du service est requis';
+      if (!formData.serviceName) {
+        newErrors.serviceName = 'Le nom du service est requis';
+      }
     } else if (formData.type === 'applicative') {
-      if (!formData.applicationName) newErrors.applicationName = 'Le nom de l\'application est requis';
+      if (!formData.applicationName) {
+        newErrors.applicationName = "Le nom de l'application est requis";
+      }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   // Soumission du formulaire
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const email = `${formData.localPart}${domainSuffix}`;
-      
+
       const payload = {
         email,
         type: formData.type,
         quotaMb: formData.quotaMb,
         hideFromDirectory: formData.hideFromDirectory
       };
-      
+
       // Ajouter les champs spécifiques selon le type
       if (formData.type === 'personal') {
         payload.owner = {
@@ -246,7 +255,7 @@ const MailboxCreate = () => {
           description: formData.applicationDescription || undefined
         };
       }
-      
+
       // Auto-réponse
       if (formData.autoReply && formData.autoReplyMessage) {
         payload.autoReply = {
@@ -254,16 +263,15 @@ const MailboxCreate = () => {
           message: formData.autoReplyMessage
         };
       }
-      
+
       await mailboxApi.create(payload);
-      
-      navigate('/mailboxes', { 
+
+      navigate('/mailboxes', {
         state: { success: `La BAL ${email} a été créée avec succès` }
       });
-      
     } catch (err) {
       console.error('Erreur création BAL:', err);
-      
+
       if (err.response?.data?.code === 'MAILBOX_EXISTS') {
         setErrors({ localPart: 'Cette adresse existe déjà' });
       } else if (err.response?.data?.code === 'QUOTA_EXCEEDED') {
@@ -285,7 +293,12 @@ const MailboxCreate = () => {
           className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
         >
           <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           Retour à la liste
         </button>
@@ -306,9 +319,24 @@ const MailboxCreate = () => {
           <h2 className="text-lg font-semibold mb-4">Type de boîte aux lettres</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { value: 'personal', label: 'Personnelle', icon: '👤', desc: 'BAL rattachée à un professionnel de santé' },
-              { value: 'organizational', label: 'Organisationnelle', icon: '🏥', desc: 'BAL rattachée à un service ou une structure' },
-              { value: 'applicative', label: 'Applicative', icon: '🤖', desc: 'BAL pour échanges automatisés (API)' }
+              {
+                value: 'personal',
+                label: 'Personnelle',
+                icon: '👤',
+                desc: 'BAL rattachée à un professionnel de santé'
+              },
+              {
+                value: 'organizational',
+                label: 'Organisationnelle',
+                icon: '🏥',
+                desc: 'BAL rattachée à un service ou une structure'
+              },
+              {
+                value: 'applicative',
+                label: 'Applicative',
+                icon: '🤖',
+                desc: 'BAL pour échanges automatisés (API)'
+              }
             ].map(type => (
               <button
                 key={type.value}
@@ -345,9 +373,7 @@ const MailboxCreate = () => {
                   }`}
                 />
               </div>
-              {errors.localPart && (
-                <p className="text-red-500 text-sm mt-1">{errors.localPart}</p>
-              )}
+              {errors.localPart && <p className="text-red-500 text-sm mt-1">{errors.localPart}</p>}
             </div>
             <span className="text-gray-500 font-medium">{domainSuffix}</span>
           </div>
@@ -365,7 +391,7 @@ const MailboxCreate = () => {
           <h2 className="text-lg font-semibold mb-4">
             {formData.type === 'personal' && 'Informations du titulaire'}
             {formData.type === 'organizational' && 'Informations du service'}
-            {formData.type === 'applicative' && 'Informations de l\'application'}
+            {formData.type === 'applicative' && "Informations de l'application"}
           </h2>
 
           {/* BAL Personnelle */}
@@ -401,14 +427,10 @@ const MailboxCreate = () => {
                     errors.lastName ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-                {errors.lastName && (
-                  <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
-                )}
+                {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  N° RPPS
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">N° RPPS</label>
                 <input
                   type="text"
                   name="rppsId"
@@ -420,14 +442,10 @@ const MailboxCreate = () => {
                     errors.rppsId ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
-                {errors.rppsId && (
-                  <p className="text-red-500 text-sm mt-1">{errors.rppsId}</p>
-                )}
+                {errors.rppsId && <p className="text-red-500 text-sm mt-1">{errors.rppsId}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  N° ADELI
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">N° ADELI</label>
                 <input
                   type="text"
                   name="adeliId"
@@ -536,9 +554,7 @@ const MailboxCreate = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   name="applicationDescription"
                   value={formData.applicationDescription}
@@ -550,7 +566,7 @@ const MailboxCreate = () => {
               </div>
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-sm text-yellow-800">
-                  <strong>Note :</strong> Les BAL applicatives nécessitent un certificat IGC-Santé 
+                  <strong>Note :</strong> Les BAL applicatives nécessitent un certificat IGC-Santé
                   pour l'authentification. Vous pourrez le configurer après la création.
                 </p>
               </div>
@@ -573,11 +589,13 @@ const MailboxCreate = () => {
                 className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 {availableQuotas.map(q => (
-                  <option key={q} value={q}>{q} Mo</option>
+                  <option key={q} value={q}>
+                    {q} Mo
+                  </option>
                 ))}
               </select>
             </div>
-            
+
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -591,7 +609,7 @@ const MailboxCreate = () => {
                 Liste rouge (ne pas publier dans l'annuaire MSSanté)
               </label>
             </div>
-            
+
             <div className="flex items-center">
               <input
                 type="checkbox"
@@ -605,7 +623,7 @@ const MailboxCreate = () => {
                 Activer la réponse automatique
               </label>
             </div>
-            
+
             {formData.autoReply && (
               <div className="ml-6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -646,7 +664,12 @@ const MailboxCreate = () => {
             ) : (
               <>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 Créer la BAL
               </>

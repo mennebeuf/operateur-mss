@@ -1,7 +1,8 @@
 // services/frontend/src/pages/Webmail/Compose.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import RichTextEditor from '../../components/Email/RichTextEditor';
+
 import RecipientInput from '../../components/Email/RecipientInput';
+import RichTextEditor from '../../components/Email/RichTextEditor';
 import { emailApi } from '../../services/emailApi';
 
 const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
@@ -16,18 +17,16 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
   const [sending, setSending] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
   const [error, setError] = useState(null);
-  
+
   const fileInputRef = useRef(null);
-  
+
   // Pré-remplir si c'est une réponse ou un transfert
   useEffect(() => {
     if (replyTo) {
       if (replyTo.forward) {
         // Transfert
         setSubject(
-          replyTo.subject?.startsWith('Fwd:') 
-            ? replyTo.subject 
-            : `Fwd: ${replyTo.subject || ''}`
+          replyTo.subject?.startsWith('Fwd:') ? replyTo.subject : `Fwd: ${replyTo.subject || ''}`
         );
         setHtml(`
           <br><br>
@@ -46,7 +45,7 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
         if (fromAddress) {
           setTo([fromAddress]);
         }
-        
+
         // Répondre à tous : ajouter les autres destinataires en CC
         if (replyTo.replyAll && replyTo.to) {
           const otherRecipients = replyTo.to
@@ -57,13 +56,11 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
             setShowCc(true);
           }
         }
-        
+
         setSubject(
-          replyTo.subject?.startsWith('Re:') 
-            ? replyTo.subject 
-            : `Re: ${replyTo.subject || ''}`
+          replyTo.subject?.startsWith('Re:') ? replyTo.subject : `Re: ${replyTo.subject || ''}`
         );
-        
+
         const quotedText = `
           <br><br>
           <div style="border-left: 3px solid #ccc; padding-left: 10px; color: #666;">
@@ -75,24 +72,24 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
       }
     }
   }, [replyTo]);
-  
+
   const handleSend = async () => {
     setError(null);
-    
+
     // Validation
     if (to.length === 0) {
       setError('Veuillez saisir au moins un destinataire');
       return;
     }
-    
+
     if (!subject.trim()) {
       if (!window.confirm('Envoyer sans objet ?')) {
         return;
       }
     }
-    
+
     setSending(true);
-    
+
     try {
       const messageData = {
         to: to.join(', '),
@@ -106,20 +103,20 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
           contentType: a.type
         }))
       };
-      
+
       await emailApi.sendMessage(messageData);
       onSendSuccess();
     } catch (error) {
       console.error('Erreur envoi:', error);
-      setError(error.response?.data?.message || 'Erreur lors de l\'envoi du message');
+      setError(error.response?.data?.message || "Erreur lors de l'envoi du message");
     } finally {
       setSending(false);
     }
   };
-  
+
   const handleSaveDraft = async () => {
     setSavingDraft(true);
-    
+
     try {
       await emailApi.saveDraft({
         to: to.join(', '),
@@ -133,7 +130,7 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
           contentType: a.type
         }))
       });
-      
+
       // Afficher une notification de succès
       alert('Brouillon enregistré');
     } catch (error) {
@@ -143,40 +140,47 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
       setSavingDraft(false);
     }
   };
-  
-  const handleAttachment = (e) => {
+
+  const handleAttachment = e => {
     const files = Array.from(e.target.files);
-    
+
     files.forEach(file => {
       const reader = new FileReader();
       reader.onload = () => {
         const base64 = reader.result.split(',')[1];
-        setAttachments(prev => [...prev, {
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          base64
-        }]);
+        setAttachments(prev => [
+          ...prev,
+          {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            base64
+          }
+        ]);
       };
       reader.readAsDataURL(file);
     });
-    
+
     // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
-  
-  const removeAttachment = (index) => {
+
+  const removeAttachment = index => {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
-  
-  const formatSize = (bytes) => {
-    if (bytes < 1024) return `${bytes} o`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
+
+  const formatSize = bytes => {
+    if (bytes < 1024) {
+      return `${bytes} o`;
+    }
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} Ko`;
+    }
     return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
   };
-  
+
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
@@ -198,7 +202,7 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
             </>
           )}
         </button>
-        
+
         <button
           onClick={handleSaveDraft}
           disabled={savingDraft}
@@ -206,7 +210,7 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
         >
           {savingDraft ? 'Sauvegarde...' : '💾 Brouillon'}
         </button>
-        
+
         <button
           onClick={() => fileInputRef.current?.click()}
           className="px-3 py-1.5 border rounded hover:bg-white transition"
@@ -220,9 +224,9 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
           onChange={handleAttachment}
           className="hidden"
         />
-        
+
         <div className="flex-1"></div>
-        
+
         <button
           onClick={onCancel}
           className="px-3 py-1.5 border rounded hover:bg-white transition text-gray-600"
@@ -230,56 +234,42 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
           ✕ Annuler
         </button>
       </div>
-      
+
       {/* Message d'erreur */}
       {error && (
         <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
           {error}
         </div>
       )}
-      
+
       {/* Champs */}
       <div className="border-b px-6 py-4 space-y-3">
         {/* À */}
         <div className="flex items-center gap-2">
           <label className="font-semibold w-12 text-gray-600">À:</label>
           <div className="flex-1">
-            <RecipientInput
-              value={to}
-              onChange={setTo}
-              placeholder="destinataire@mssante.fr"
-            />
+            <RecipientInput value={to} onChange={setTo} placeholder="destinataire@mssante.fr" />
           </div>
           <div className="flex gap-2 text-sm">
             {!showCc && (
-              <button
-                onClick={() => setShowCc(true)}
-                className="text-blue-600 hover:underline"
-              >
+              <button onClick={() => setShowCc(true)} className="text-blue-600 hover:underline">
                 Cc
               </button>
             )}
             {!showBcc && (
-              <button
-                onClick={() => setShowBcc(true)}
-                className="text-blue-600 hover:underline"
-              >
+              <button onClick={() => setShowBcc(true)} className="text-blue-600 hover:underline">
                 Cci
               </button>
             )}
           </div>
         </div>
-        
+
         {/* Cc */}
         {showCc && (
           <div className="flex items-center gap-2">
             <label className="font-semibold w-12 text-gray-600">Cc:</label>
             <div className="flex-1">
-              <RecipientInput
-                value={cc}
-                onChange={setCc}
-                placeholder="copie@mssante.fr"
-              />
+              <RecipientInput value={cc} onChange={setCc} placeholder="copie@mssante.fr" />
             </div>
             <button
               onClick={() => {
@@ -292,17 +282,13 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
             </button>
           </div>
         )}
-        
+
         {/* Bcc */}
         {showBcc && (
           <div className="flex items-center gap-2">
             <label className="font-semibold w-12 text-gray-600">Cci:</label>
             <div className="flex-1">
-              <RecipientInput
-                value={bcc}
-                onChange={setBcc}
-                placeholder="copie-cachee@mssante.fr"
-              />
+              <RecipientInput value={bcc} onChange={setBcc} placeholder="copie-cachee@mssante.fr" />
             </div>
             <button
               onClick={() => {
@@ -315,19 +301,19 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
             </button>
           </div>
         )}
-        
+
         {/* Objet */}
         <div className="flex items-center gap-2">
           <label className="font-semibold w-12 text-gray-600">Objet:</label>
           <input
             type="text"
             value={subject}
-            onChange={(e) => setSubject(e.target.value)}
+            onChange={e => setSubject(e.target.value)}
             placeholder="Objet du message..."
             className="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        
+
         {/* Pièces jointes */}
         {attachments.length > 0 && (
           <div className="flex flex-wrap gap-2 pt-2">
@@ -350,13 +336,10 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
           </div>
         )}
       </div>
-      
+
       {/* Éditeur */}
       <div className="flex-1 overflow-y-auto p-4">
-        <RichTextEditor
-          value={html}
-          onChange={setHtml}
-        />
+        <RichTextEditor value={html} onChange={setHtml} />
       </div>
     </div>
   );

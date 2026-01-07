@@ -20,15 +20,31 @@ const CertificateUpload = () => {
   const [errors, setErrors] = useState({});
 
   const certTypes = [
-    { value: 'SERV_SSL', label: 'Serveur SSL/TLS', description: 'Certificat pour sécuriser les connexions HTTPS, IMAPS, SMTPS' },
-    { value: 'ORG_AUTH_CLI', label: 'Authentification Client Organisation', description: 'Certificat pour authentifier l\'organisation auprès de l\'annuaire' },
-    { value: 'ORG_SIGN', label: 'Signature Organisation', description: 'Certificat pour signer les messages au nom de l\'organisation' },
-    { value: 'ORG_CONF', label: 'Confidentialité Organisation', description: 'Certificat pour le chiffrement des messages' }
+    {
+      value: 'SERV_SSL',
+      label: 'Serveur SSL/TLS',
+      description: 'Certificat pour sécuriser les connexions HTTPS, IMAPS, SMTPS'
+    },
+    {
+      value: 'ORG_AUTH_CLI',
+      label: 'Authentification Client Organisation',
+      description: "Certificat pour authentifier l'organisation auprès de l'annuaire"
+    },
+    {
+      value: 'ORG_SIGN',
+      label: 'Signature Organisation',
+      description: "Certificat pour signer les messages au nom de l'organisation"
+    },
+    {
+      value: 'ORG_CONF',
+      label: 'Confidentialité Organisation',
+      description: 'Certificat pour le chiffrement des messages'
+    }
   ];
 
-  const handleCertChange = async (e) => {
+  const handleCertChange = async e => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) {return;}
 
     setCertFile(file);
     setPreview(null);
@@ -43,13 +59,13 @@ const CertificateUpload = () => {
       const response = await fetch('/api/v1/certificates/verify', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: formDataUpload
       });
 
       const data = await response.json();
-      
+
       if (data.success) {
         setPreview(data.data);
       } else {
@@ -62,7 +78,7 @@ const CertificateUpload = () => {
     }
   };
 
-  const handleKeyChange = (e) => {
+  const handleKeyChange = e => {
     const file = e.target.files[0];
     if (file) {
       setKeyFile(file);
@@ -88,10 +104,10 @@ const CertificateUpload = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    if (!validateForm()) {return;}
 
     setLoading(true);
     setErrors({});
@@ -113,7 +129,7 @@ const CertificateUpload = () => {
       const response = await fetch('/api/v1/certificates/upload', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         },
         body: uploadData
       });
@@ -123,10 +139,10 @@ const CertificateUpload = () => {
       if (data.success) {
         navigate(`/admin/certificates/${data.data.id}`);
       } else {
-        setErrors({ submit: data.error || 'Erreur lors de l\'import' });
+        setErrors({ submit: data.error || "Erreur lors de l'import" });
       }
     } catch (error) {
-      setErrors({ submit: 'Erreur lors de l\'import du certificat' });
+      setErrors({ submit: "Erreur lors de l'import du certificat" });
     } finally {
       setLoading(false);
     }
@@ -135,7 +151,10 @@ const CertificateUpload = () => {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <Link to="/admin/certificates" className="text-blue-600 hover:underline text-sm mb-2 inline-block">
+        <Link
+          to="/admin/certificates"
+          className="text-blue-600 hover:underline text-sm mb-2 inline-block"
+        >
           ← Retour aux certificats
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">Importer un certificat IGC Santé</h1>
@@ -159,7 +178,7 @@ const CertificateUpload = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4">Type de certificat</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {certTypes.map((type) => (
+            {certTypes.map(type => (
               <label
                 key={type.value}
                 className={`border rounded-lg p-4 cursor-pointer transition ${
@@ -173,7 +192,7 @@ const CertificateUpload = () => {
                   name="type"
                   value={type.value}
                   checked={formData.type === type.value}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  onChange={e => setFormData({ ...formData, type: e.target.value })}
                   className="sr-only"
                 />
                 <div className="flex items-start gap-3">
@@ -197,7 +216,7 @@ const CertificateUpload = () => {
         {/* Upload fichiers */}
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4">Fichiers</h3>
-          
+
           {/* Certificat */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -225,7 +244,7 @@ const CertificateUpload = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       setCertFile(null);
                       setPreview(null);
@@ -273,7 +292,7 @@ const CertificateUpload = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       setKeyFile(null);
                     }}
@@ -300,7 +319,7 @@ const CertificateUpload = () => {
             <input
               type="password"
               value={formData.passphrase}
-              onChange={(e) => setFormData({ ...formData, passphrase: e.target.value })}
+              onChange={e => setFormData({ ...formData, passphrase: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
               placeholder="Laissez vide si non protégée"
             />
@@ -324,11 +343,15 @@ const CertificateUpload = () => {
             <dl className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <dt className="text-sm text-gray-500">Sujet (CN)</dt>
-                <dd className="font-medium">{preview.subject?.commonName || preview.subject?.CN}</dd>
+                <dd className="font-medium">
+                  {preview.subject?.commonName || preview.subject?.CN}
+                </dd>
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Organisation</dt>
-                <dd className="font-medium">{preview.subject?.organizationName || preview.subject?.O || 'N/A'}</dd>
+                <dd className="font-medium">
+                  {preview.subject?.organizationName || preview.subject?.O || 'N/A'}
+                </dd>
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Émetteur</dt>
@@ -337,15 +360,21 @@ const CertificateUpload = () => {
               <div>
                 <dt className="text-sm text-gray-500">Validité</dt>
                 <dd className="font-medium">
-                  {new Date(preview.validFrom).toLocaleDateString('fr-FR')} → {new Date(preview.validTo).toLocaleDateString('fr-FR')}
+                  {new Date(preview.validFrom).toLocaleDateString('fr-FR')} →{' '}
+                  {new Date(preview.validTo).toLocaleDateString('fr-FR')}
                 </dd>
               </div>
               <div>
                 <dt className="text-sm text-gray-500">Jours restants</dt>
-                <dd className={`font-bold ${
-                  preview.daysUntilExpiry <= 30 ? 'text-red-600' :
-                  preview.daysUntilExpiry <= 90 ? 'text-yellow-600' : 'text-green-600'
-                }`}>
+                <dd
+                  className={`font-bold ${
+                    preview.daysUntilExpiry <= 30
+                      ? 'text-red-600'
+                      : preview.daysUntilExpiry <= 90
+                        ? 'text-yellow-600'
+                        : 'text-green-600'
+                  }`}
+                >
                   {preview.daysUntilExpiry} jours
                 </dd>
               </div>
@@ -375,10 +404,7 @@ const CertificateUpload = () => {
 
         {/* Actions */}
         <div className="flex justify-end gap-4">
-          <Link
-            to="/admin/certificates"
-            className="px-6 py-2 border rounded-md hover:bg-gray-50"
-          >
+          <Link to="/admin/certificates" className="px-6 py-2 border rounded-md hover:bg-gray-50">
             Annuler
           </Link>
           <button

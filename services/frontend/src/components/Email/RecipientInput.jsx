@@ -1,13 +1,13 @@
 // services/frontend/src/components/Email/RecipientInput.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
-const RecipientInput = ({ 
-  recipients = [], 
-  onChange, 
-  placeholder = 'Ajouter un destinataire...', 
+const RecipientInput = ({
+  recipients = [],
+  onChange,
+  placeholder = 'Ajouter un destinataire...',
   onSearch,
   suggestions = [],
-  disabled = false 
+  disabled = false
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -17,7 +17,7 @@ const RecipientInput = ({
 
   // Fermer les suggestions si clic extérieur
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handleClickOutside = e => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setShowSuggestions(false);
       }
@@ -27,16 +27,18 @@ const RecipientInput = ({
   }, []);
 
   // Valider une adresse email
-  const isValidEmail = (email) => {
+  const isValidEmail = email => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email.trim());
   };
 
   // Ajouter un destinataire
-  const addRecipient = (value) => {
+  const addRecipient = value => {
     const email = value.trim().toLowerCase();
-    
-    if (!email) return;
+
+    if (!email) {
+      return;
+    }
     if (!isValidEmail(email)) {
       alert('Adresse email invalide');
       return;
@@ -45,7 +47,7 @@ const RecipientInput = ({
       alert('Ce destinataire est déjà ajouté');
       return;
     }
-    
+
     onChange([...recipients, email]);
     setInputValue('');
     setShowSuggestions(false);
@@ -53,15 +55,15 @@ const RecipientInput = ({
   };
 
   // Supprimer un destinataire
-  const removeRecipient = (emailToRemove) => {
+  const removeRecipient = emailToRemove => {
     onChange(recipients.filter(email => email !== emailToRemove));
   };
 
   // Gérer la saisie
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const value = e.target.value;
     setInputValue(value);
-    
+
     // Rechercher des suggestions
     if (value.length >= 2 && onSearch) {
       onSearch(value);
@@ -69,16 +71,16 @@ const RecipientInput = ({
     } else {
       setShowSuggestions(false);
     }
-    
+
     setSelectedSuggestionIndex(-1);
   };
 
   // Gérer les touches clavier
-  const handleKeyDown = (e) => {
+  const handleKeyDown = e => {
     // Entrée ou virgule = ajouter
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
-      
+
       if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
         addRecipient(suggestions[selectedSuggestionIndex].email);
       } else if (inputValue) {
@@ -86,30 +88,28 @@ const RecipientInput = ({
       }
       return;
     }
-    
+
     // Tab = ajouter si valeur présente
     if (e.key === 'Tab' && inputValue) {
       e.preventDefault();
       addRecipient(inputValue);
       return;
     }
-    
+
     // Backspace = supprimer le dernier si input vide
     if (e.key === 'Backspace' && !inputValue && recipients.length > 0) {
       removeRecipient(recipients[recipients.length - 1]);
       return;
     }
-    
+
     // Navigation dans les suggestions
     if (showSuggestions && suggestions.length > 0) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
+        setSelectedSuggestionIndex(prev => (prev < suggestions.length - 1 ? prev + 1 : prev));
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => prev > 0 ? prev - 1 : -1);
+        setSelectedSuggestionIndex(prev => (prev > 0 ? prev - 1 : -1));
       } else if (e.key === 'Escape') {
         setShowSuggestions(false);
       }
@@ -117,7 +117,7 @@ const RecipientInput = ({
   };
 
   // Sélectionner une suggestion
-  const selectSuggestion = (suggestion) => {
+  const selectSuggestion = suggestion => {
     addRecipient(suggestion.email);
     inputRef.current?.focus();
   };
@@ -125,7 +125,7 @@ const RecipientInput = ({
   return (
     <div ref={containerRef} className="relative flex-1">
       {/* Container principal */}
-      <div 
+      <div
         className={`
           flex flex-wrap items-center gap-1 
           border rounded-lg px-2 py-1.5
@@ -136,7 +136,7 @@ const RecipientInput = ({
         onClick={() => inputRef.current?.focus()}
       >
         {/* Tags des destinataires */}
-        {recipients.map((email) => (
+        {recipients.map(email => (
           <span
             key={email}
             className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-sm"
@@ -145,7 +145,7 @@ const RecipientInput = ({
             {!disabled && (
               <button
                 type="button"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   removeRecipient(email);
                 }}
@@ -156,7 +156,7 @@ const RecipientInput = ({
             )}
           </span>
         ))}
-        
+
         {/* Input */}
         <input
           ref={inputRef}
@@ -184,9 +184,7 @@ const RecipientInput = ({
               `}
             >
               <div className="font-medium text-sm">{suggestion.name || suggestion.email}</div>
-              {suggestion.name && (
-                <div className="text-xs text-gray-500">{suggestion.email}</div>
-              )}
+              {suggestion.name && <div className="text-xs text-gray-500">{suggestion.email}</div>}
             </div>
           ))}
         </div>
