@@ -246,9 +246,9 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
       <div className="border-b px-6 py-4 space-y-3">
         {/* À */}
         <div className="flex items-center gap-2">
-          <label className="font-semibold w-12 text-gray-600">À:</label>
+          <label htmlFor="destinataires" className="font-semibold w-12 text-gray-600">À:</label>
           <div className="flex-1">
-            <RecipientInput value={to} onChange={setTo} placeholder="destinataire@mssante.fr" />
+            <RecipientInput id="destinataires" value={to} onChange={setTo} placeholder="destinataire@mssante.fr" />
           </div>
           <div className="flex gap-2 text-sm">
             {!showCc && (
@@ -267,9 +267,9 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
         {/* Cc */}
         {showCc && (
           <div className="flex items-center gap-2">
-            <label className="font-semibold w-12 text-gray-600">Cc:</label>
+            <label htmlFor="copies" className="font-semibold w-12 text-gray-600">Cc:</label>
             <div className="flex-1">
-              <RecipientInput value={cc} onChange={setCc} placeholder="copie@mssante.fr" />
+              <RecipientInput id="copies" value={cc} onChange={setCc} placeholder="copie@mssante.fr" />
             </div>
             <button
               onClick={() => {
@@ -286,9 +286,9 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
         {/* Bcc */}
         {showBcc && (
           <div className="flex items-center gap-2">
-            <label className="font-semibold w-12 text-gray-600">Cci:</label>
+            <label htmlFor="copies-cachees" className="font-semibold w-12 text-gray-600">Cci:</label>
             <div className="flex-1">
-              <RecipientInput value={bcc} onChange={setBcc} placeholder="copie-cachee@mssante.fr" />
+              <RecipientInput id="copies-cachees" value={bcc} onChange={setBcc} placeholder="copie-cachee@mssante.fr" />
             </div>
             <button
               onClick={() => {
@@ -304,8 +304,9 @@ const Compose = ({ replyTo, onCancel, onSendSuccess }) => {
 
         {/* Objet */}
         <div className="flex items-center gap-2">
-          <label className="font-semibold w-12 text-gray-600">Objet:</label>
+          <label htmlFor="objet" className="font-semibold w-12 text-gray-600">Objet:</label>
           <input
+            id="objet"
             type="text"
             value={subject}
             onChange={e => setSubject(e.target.value)}

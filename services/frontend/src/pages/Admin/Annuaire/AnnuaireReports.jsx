@@ -91,8 +91,11 @@ const AnnuaireReports = () => {
         <h2 className="text-lg font-semibold mb-4">Générer un nouveau rapport</h2>
         <div className="flex items-end gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Période</label>
+            <label htmlFor="period-select" className="block text-sm font-medium text-gray-700 mb-1">
+              Période
+            </label>
             <input
+              id="period-select"
               type="month"
               value={selectedMonth}
               onChange={e => setSelectedMonth(e.target.value)}

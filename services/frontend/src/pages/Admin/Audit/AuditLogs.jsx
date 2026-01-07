@@ -150,8 +150,11 @@ const AuditLogs = () => {
       <div className="bg-white rounded-lg shadow p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Action</label>
+            <label htmlFor="filter-action" className="block text-sm font-medium text-gray-700 mb-1">
+              Action
+            </label>
             <select
+              id="filter-action"
               value={filters.action}
               onChange={e => handleFilterChange('action', e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -165,8 +168,11 @@ const AuditLogs = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Utilisateur</label>
+            <label htmlFor="filter-user" className="block text-sm font-medium text-gray-700 mb-1">
+              Utilisateur
+            </label>
             <input
+              id="filter-user"
               type="text"
               value={filters.user}
               onChange={e => handleFilterChange('user', e.target.value)}
@@ -175,8 +181,14 @@ const AuditLogs = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date début</label>
+            <label
+              htmlFor="filter-date-from"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Date début
+            </label>
             <input
+              id="filter-date-from"
               type="date"
               value={filters.dateFrom}
               onChange={e => handleFilterChange('dateFrom', e.target.value)}
@@ -184,8 +196,14 @@ const AuditLogs = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date fin</label>
+            <label
+              htmlFor="filter-date-to"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Date fin
+            </label>
             <input
+              id="filter-date-to"
               type="date"
               value={filters.dateTo}
               onChange={e => handleFilterChange('dateTo', e.target.value)}

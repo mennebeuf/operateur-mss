@@ -196,10 +196,11 @@ const DomainEdit = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">
+              <label htmlFor="edit-org-name" className="block text-sm font-medium mb-1">
                 Nom de l'organisation <span className="text-red-500">*</span>
               </label>
               <input
+                id="edit-org-name"
                 type="text"
                 name="organization_name"
                 value={formData.organization_name}
@@ -214,8 +215,9 @@ const DomainEdit = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Type d'organisation</label>
+              <label htmlFor="edit-org-type" className="block text-sm font-medium mb-1">Type d'organisation</label>
               <select
+                id="edit-org-type"
                 name="organization_type"
                 value={formData.organization_type}
                 onChange={handleChange}
@@ -230,8 +232,9 @@ const DomainEdit = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Statut</label>
+              <label htmlFor="edit-status" className="block text-sm font-medium mb-1">Statut</label>
               <select
+                id="edit-status"
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
@@ -244,8 +247,9 @@ const DomainEdit = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Email de contact</label>
+              <label htmlFor="edit-contact-email" className="block text-sm font-medium mb-1">Email de contact</label>
               <input
+                id="edit-contact-email"
                 type="email"
                 name="contact_email"
                 value={formData.contact_email}
@@ -260,8 +264,9 @@ const DomainEdit = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Téléphone de contact</label>
+              <label htmlFor="edit-contact-phone" className="block text-sm font-medium mb-1">Téléphone de contact</label>
               <input
+                id="edit-contact-phone"
                 type="tel"
                 name="contact_phone"
                 value={formData.contact_phone}
@@ -282,8 +287,9 @@ const DomainEdit = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Nombre maximum de BAL</label>
+              <label htmlFor="edit-max-mailboxes" className="block text-sm font-medium mb-1">Nombre maximum de BAL</label>
               <input
+                id="edit-max-mailboxes"
                 type="number"
                 name="max_mailboxes"
                 value={formData.max_mailboxes}
@@ -303,8 +309,9 @@ const DomainEdit = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Stockage maximum (GB)</label>
+              <label htmlFor="edit-max-storage-gb" className="block text-sm font-medium mb-1">Stockage maximum (GB)</label>
               <input
+                id="edit-max-storage-gb"
                 type="number"
                 name="max_storage_gb"
                 value={formData.max_storage_gb}

@@ -161,11 +161,12 @@ const DomainCreate = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">
+              <label htmlFor="domain-name" className="block text-sm font-medium mb-1">
                 Nom de domaine <span className="text-red-500">*</span>
                 <span className="text-gray-500 font-normal ml-1">(.mssante.fr)</span>
               </label>
               <input
+                id="domain-name"
                 type="text"
                 name="domain_name"
                 value={formData.domain_name}
@@ -181,10 +182,11 @@ const DomainCreate = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label htmlFor="finess-juridique" className="block text-sm font-medium mb-1">
                 FINESS Juridique <span className="text-red-500">*</span>
               </label>
               <input
+                id="finess-juridique"
                 type="text"
                 name="finess_juridique"
                 value={formData.finess_juridique}
@@ -201,10 +203,11 @@ const DomainCreate = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label htmlFor="finess-geographique" className="block text-sm font-medium mb-1">
                 FINESS Géographique <span className="text-gray-400">(optionnel)</span>
               </label>
               <input
+                id="finess-geographique"
                 type="text"
                 name="finess_geographique"
                 value={formData.finess_geographique}
@@ -227,10 +230,11 @@ const DomainCreate = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">
+              <label htmlFor="org-name" className="block text-sm font-medium mb-1">
                 Nom de l'organisation <span className="text-red-500">*</span>
               </label>
               <input
+                id="org-name"
                 type="text"
                 name="organization_name"
                 value={formData.organization_name}
@@ -246,8 +250,9 @@ const DomainCreate = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Type d'organisation</label>
+              <label htmlFor="org-type" className="block text-sm font-medium mb-1">Type d'organisation</label>
               <select
+                id="org-type"
                 name="organization_type"
                 value={formData.organization_type}
                 onChange={handleChange}
@@ -262,8 +267,9 @@ const DomainCreate = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Email de contact</label>
+              <label htmlFor="contact-email" className="block text-sm font-medium mb-1">Email de contact</label>
               <input
+                id="contact-email"
                 type="email"
                 name="contact_email"
                 value={formData.contact_email}
@@ -279,8 +285,9 @@ const DomainCreate = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Téléphone de contact</label>
+              <label htmlFor="contact-phone" className="block text-sm font-medium mb-1">Téléphone de contact</label>
               <input
+                id="contact-phone"
                 type="tel"
                 name="contact_phone"
                 value={formData.contact_phone}
@@ -302,8 +309,9 @@ const DomainCreate = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Nombre maximum de BAL</label>
+              <label htmlFor="max-mailboxes" className="block text-sm font-medium mb-1">Nombre maximum de BAL</label>
               <input
+                id="max-mailboxes"
                 type="number"
                 name="max_mailboxes"
                 value={formData.max_mailboxes}
@@ -320,8 +328,9 @@ const DomainCreate = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Stockage maximum (GB)</label>
+              <label htmlFor="max-storage-gb" className="block text-sm font-medium mb-1">Stockage maximum (GB)</label>
               <input
+                id="max-storage-gb"
                 type="number"
                 name="max_storage_gb"
                 value={formData.max_storage_gb}

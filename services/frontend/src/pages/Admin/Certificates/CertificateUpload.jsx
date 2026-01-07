@@ -181,6 +181,7 @@ const CertificateUpload = () => {
             {certTypes.map(type => (
               <label
                 key={type.value}
+                aria-label={type.label}
                 className={`border rounded-lg p-4 cursor-pointer transition ${
                   formData.type === type.value
                     ? 'border-blue-500 bg-blue-50'
@@ -219,7 +220,7 @@ const CertificateUpload = () => {
 
           {/* Certificat */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="cert-file-input" className="block text-sm font-medium text-gray-700 mb-2">
               Certificat (.pem, .crt, .cer) *
             </label>
             <div
@@ -229,6 +230,7 @@ const CertificateUpload = () => {
               } ${errors.cert ? 'border-red-400' : ''}`}
             >
               <input
+                id="cert-file-input"
                 ref={certInputRef}
                 type="file"
                 accept=".pem,.crt,.cer,.p12,.pfx"
@@ -313,10 +315,11 @@ const CertificateUpload = () => {
 
           {/* Passphrase */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="cert-passphrase" className="block text-sm font-medium text-gray-700 mb-2">
               Passphrase (si clé protégée)
             </label>
             <input
+              id="cert-passphrase"
               type="password"
               value={formData.passphrase}
               onChange={e => setFormData({ ...formData, passphrase: e.target.value })}

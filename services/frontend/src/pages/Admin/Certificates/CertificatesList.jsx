@@ -149,8 +149,9 @@ const CertificatesList = () => {
       <div className="bg-white p-4 rounded-lg shadow">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label htmlFor="filter-cert-type" className="block text-sm font-medium text-gray-700 mb-1">Type</label>
             <select
+              id="filter-cert-type"
               value={filters.type}
               onChange={e => setFilters({ ...filters, type: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
@@ -163,8 +164,9 @@ const CertificatesList = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+            <label htmlFor="filter-cert-status" className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
             <select
+              id="filter-cert-status"
               value={filters.status}
               onChange={e => setFilters({ ...filters, status: e.target.value })}
               className="w-full border rounded-md px-3 py-2"
@@ -177,8 +179,9 @@ const CertificatesList = () => {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Expiration</label>
+            <label htmlFor="filter-cert-expiring" className="block text-sm font-medium text-gray-700 mb-1">Expiration</label>
             <select
+              id="filter-cert-expiring"
               value={filters.expiringDays}
               onChange={e => setFilters({ ...filters, expiringDays: e.target.value })}
               className="w-full border rounded-md px-3 py-2"

@@ -130,10 +130,11 @@ const UserCreate = () => {
         {/* Domaine (Super Admin uniquement) */}
         {isSuperAdmin && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="domain-id" className="block text-sm font-medium text-gray-700 mb-1">
               Domaine <span className="text-red-500">*</span>
             </label>
             <select
+              id="domain-id"
               name="domain_id"
               value={formData.domain_id}
               onChange={handleChange}
@@ -154,10 +155,11 @@ const UserCreate = () => {
 
         {/* Email */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email <span className="text-red-500">*</span>
           </label>
           <input
+            id="email"
             type="email"
             name="email"
             value={formData.email}
@@ -173,10 +175,11 @@ const UserCreate = () => {
         {/* Prénom / Nom */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-1">
               Prénom <span className="text-red-500">*</span>
             </label>
             <input
+              id="first-name"
               type="text"
               name="first_name"
               value={formData.first_name}
@@ -188,10 +191,11 @@ const UserCreate = () => {
             {errors.first_name && <p className="mt-1 text-sm text-red-500">{errors.first_name}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-1">
               Nom <span className="text-red-500">*</span>
             </label>
             <input
+              id="last-name"
               type="text"
               name="last_name"
               value={formData.last_name}
@@ -206,8 +210,9 @@ const UserCreate = () => {
 
         {/* RPPS */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Numéro RPPS</label>
+          <label htmlFor="rpps" className="block text-sm font-medium text-gray-700 mb-1">Numéro RPPS</label>
           <input
+            id="rpps"
             type="text"
             name="rpps"
             value={formData.rpps}
@@ -223,8 +228,9 @@ const UserCreate = () => {
 
         {/* Rôle */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
           <select
+            id="role"
             name="role"
             value={formData.role}
             onChange={handleChange}

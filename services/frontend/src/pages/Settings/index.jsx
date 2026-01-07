@@ -165,8 +165,13 @@ const Settings = () => {
                     <p className="font-medium">{item.label}</p>
                     <p className="text-sm text-gray-500">{item.desc}</p>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
+                  <label
+                    htmlFor={`notif-${item.key}`}
+                    aria-label={item.label}
+                    className="relative inline-flex items-center cursor-pointer"
+                  >
                     <input
+                      id={`notif-${item.key}`}
                       type="checkbox"
                       checked={settings.notifications[item.key] || false}
                       onChange={e => handleChange('notifications', item.key, e.target.checked)}
@@ -185,8 +190,14 @@ const Settings = () => {
               <h3 className="font-medium text-gray-900 mb-4">Préférences d'affichage</h3>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Langue</label>
+                <label
+                  htmlFor="display-language"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Langue
+                </label>
                 <select
+                  id="display-language"
                   value={settings.display.language}
                   onChange={e => handleChange('display', 'language', e.target.value)}
                   className="w-full max-w-xs px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -197,10 +208,14 @@ const Settings = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="fuseau-horaire"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Fuseau horaire
                 </label>
                 <select
+                  id="fuseau-horaire"
                   value={settings.display.timezone}
                   onChange={e => handleChange('display', 'timezone', e.target.value)}
                   className="w-full max-w-xs px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -212,10 +227,14 @@ const Settings = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="msg-par-page"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Messages par page
                 </label>
                 <select
+                  id="msg-par-page"
                   value={settings.display.messages_per_page}
                   onChange={e =>
                     handleChange('display', 'messages_per_page', parseInt(e.target.value))
@@ -236,8 +255,11 @@ const Settings = () => {
               <h3 className="font-medium text-gray-900 mb-4">Paramètres email</h3>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Signature</label>
+                <label htmlFor="signature" className="block text-sm font-medium text-gray-700 mb-1">
+                  Signature
+                </label>
                 <textarea
+                  id="signature"
                   value={settings.email.signature}
                   onChange={e => handleChange('email', 'signature', e.target.value)}
                   rows={4}
@@ -251,8 +273,13 @@ const Settings = () => {
                   <p className="font-medium">Réponse automatique</p>
                   <p className="text-sm text-gray-500">Activer le répondeur automatique</p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
+                <label
+                  htmlFor="toggle-auto-reply"
+                  aria-label="Activation de la réponse automatique"
+                  className="relative inline-flex items-center cursor-pointer"
+                >
                   <input
+                    id="toggle-auto-reply"
                     type="checkbox"
                     checked={settings.email.auto_reply_enabled || false}
                     onChange={e => handleChange('email', 'auto_reply_enabled', e.target.checked)}
@@ -264,10 +291,14 @@ const Settings = () => {
 
               {settings.email.auto_reply_enabled && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="auto-reply-msg"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Message de réponse automatique
                   </label>
                   <textarea
+                    id="auto-reply-msg"
                     value={settings.email.auto_reply_message}
                     onChange={e => handleChange('email', 'auto_reply_message', e.target.value)}
                     rows={4}

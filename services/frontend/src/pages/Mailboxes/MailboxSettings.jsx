@@ -365,10 +365,14 @@ const MailboxSettings = () => {
             <form onSubmit={handleSaveGeneral} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="general-quota"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     Quota de stockage
                   </label>
                   <select
+                    id="general-quota"
                     value={generalForm.quotaMb}
                     onChange={e =>
                       setGeneralForm(f => ({ ...f, quotaMb: parseInt(e.target.value) }))
@@ -382,8 +386,14 @@ const MailboxSettings = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                  <label
+                    htmlFor="general-status"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Statut
+                  </label>
                   <select
+                    id="general-status"
                     value={generalForm.status}
                     onChange={e => setGeneralForm(f => ({ ...f, status: e.target.value }))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -441,8 +451,14 @@ const MailboxSettings = () => {
               {autoReplyForm.enabled && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Objet</label>
+                    <label
+                      htmlFor="autoreply-subject"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Objet
+                    </label>
                     <input
+                      id="autoreply-subject"
                       type="text"
                       value={autoReplyForm.subject}
                       onChange={e => setAutoReplyForm(f => ({ ...f, subject: e.target.value }))}
@@ -450,8 +466,14 @@ const MailboxSettings = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                    <label
+                      htmlFor="autoreply-message"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Message
+                    </label>
                     <textarea
+                      id="autoreply-message"
                       value={autoReplyForm.message}
                       onChange={e => setAutoReplyForm(f => ({ ...f, message: e.target.value }))}
                       rows={5}
@@ -461,10 +483,14 @@ const MailboxSettings = () => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="autoreply-start-date"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Date de début
                       </label>
                       <input
+                        id="autoreply-start-date"
                         type="datetime-local"
                         value={autoReplyForm.startDate}
                         onChange={e => setAutoReplyForm(f => ({ ...f, startDate: e.target.value }))}
@@ -472,10 +498,14 @@ const MailboxSettings = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="autoreply-end-date"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Date de fin
                       </label>
                       <input
+                        id="autoreply-end-date"
                         type="datetime-local"
                         value={autoReplyForm.endDate}
                         onChange={e => setAutoReplyForm(f => ({ ...f, endDate: e.target.value }))}
@@ -636,10 +666,14 @@ const MailboxSettings = () => {
         <Modal onClose={() => setShowDelegationModal(false)} title="Ajouter une délégation">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="delegation-email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email du délégué
               </label>
               <input
+                id="delegation-email"
                 type="email"
                 value={newDelegation.email}
                 onChange={e => setNewDelegation(d => ({ ...d, email: e.target.value }))}
@@ -648,11 +682,21 @@ const MailboxSettings = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Permissions</label>
-              <div className="space-y-2">
+              <span
+                id="delegation-permissions-label"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Permissions
+              </span>
+              <div
+                className="space-y-2"
+                role="group"
+                aria-labelledby="delegation-permissions-label"
+              >
                 {['read', 'send', 'delete', 'manage'].map(perm => (
-                  <label key={perm} className="flex items-center">
+                  <label key={perm} htmlFor={`perm-${perm}`} className="flex items-center">
                     <input
+                      id={`perm-${perm}`}
                       type="checkbox"
                       checked={newDelegation.permissions.includes(perm)}
                       onChange={e => {
@@ -676,6 +720,7 @@ const MailboxSettings = () => {
                 ))}
               </div>
             </div>
+
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowDelegationModal(false)}
@@ -699,10 +744,11 @@ const MailboxSettings = () => {
         <Modal onClose={() => setShowPasswordModal(false)} title="Changer le mot de passe">
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="new-email" className="block text-sm font-medium text-gray-700 mb-1">
                 Nouveau mot de passe
               </label>
               <input
+                id="new-email"
                 type="password"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}

@@ -130,8 +130,9 @@ const UserEdit = () => {
 
         {/* Email (lecture seule) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
           <input
+            id="email"
             type="email"
             value={formData.email}
             disabled
@@ -142,10 +143,11 @@ const UserEdit = () => {
         {/* Prénom / Nom */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-1">
               Prénom <span className="text-red-500">*</span>
             </label>
             <input
+              id="first-name"
               type="text"
               name="first_name"
               value={formData.first_name}
@@ -157,10 +159,11 @@ const UserEdit = () => {
             {errors.first_name && <p className="mt-1 text-sm text-red-500">{errors.first_name}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-1">
               Nom <span className="text-red-500">*</span>
             </label>
             <input
+              id="last-name"
               type="text"
               name="last_name"
               value={formData.last_name}
@@ -175,8 +178,9 @@ const UserEdit = () => {
 
         {/* RPPS */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Numéro RPPS</label>
+          <label htmlFor="rpps" className="block text-sm font-medium text-gray-700 mb-1">Numéro RPPS</label>
           <input
+            id="rpps"
             type="text"
             name="rpps"
             value={formData.rpps}
@@ -188,8 +192,9 @@ const UserEdit = () => {
 
         {/* Rôle */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
           <select
+            id="role"
             name="role"
             value={formData.role}
             onChange={handleChange}
@@ -203,8 +208,9 @@ const UserEdit = () => {
 
         {/* Statut */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+          <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
           <select
+            id="status"
             name="status"
             value={formData.status}
             onChange={handleChange}

@@ -398,10 +398,11 @@ const MailboxCreate = () => {
           {formData.type === 'personal' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="fistname" className="block text-sm font-medium text-gray-700 mb-1">
                   Prénom <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="firstname"
                   type="text"
                   name="firstName"
                   value={formData.firstName}
@@ -415,10 +416,11 @@ const MailboxCreate = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="lastname" className="block text-sm font-medium text-gray-700 mb-1">
                   Nom <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="lastname"
                   type="text"
                   name="lastName"
                   value={formData.lastName}
@@ -430,8 +432,9 @@ const MailboxCreate = () => {
                 {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">N° RPPS</label>
+                <label htmlFor="rpps-id" className="block text-sm font-medium text-gray-700 mb-1">N° RPPS</label>
                 <input
+                  id="rpps-id"
                   type="text"
                   name="rppsId"
                   value={formData.rppsId}
@@ -445,8 +448,9 @@ const MailboxCreate = () => {
                 {errors.rppsId && <p className="text-red-500 text-sm mt-1">{errors.rppsId}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">N° ADELI</label>
+                <label htmlFor="adeli-id" className="block text-sm font-medium text-gray-700 mb-1">N° ADELI</label>
                 <input
+                  id="adeli-id"
                   type="text"
                   name="adeliId"
                   value={formData.adeliId}
@@ -463,10 +467,11 @@ const MailboxCreate = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="service-name" className="block text-sm font-medium text-gray-700 mb-1">
                     Nom du service <span className="text-red-500">*</span>
                   </label>
                   <input
+                    id="service-name"
                     type="text"
                     name="serviceName"
                     value={formData.serviceName}
@@ -481,10 +486,11 @@ const MailboxCreate = () => {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="service-type" className="block text-sm font-medium text-gray-700 mb-1">
                     Type de service
                   </label>
                   <select
+                    id="service-type"
                     name="serviceType"
                     value={formData.serviceType}
                     onChange={handleChange}
@@ -501,10 +507,11 @@ const MailboxCreate = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="finess-juridique" className="block text-sm font-medium text-gray-700 mb-1">
                     FINESS Juridique
                   </label>
                   <input
+                    id="finess-juridique"
                     type="text"
                     name="finessJuridique"
                     value={formData.finessJuridique}
@@ -515,10 +522,11 @@ const MailboxCreate = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="finess-geographique" className="block text-sm font-medium text-gray-700 mb-1">
                     FINESS Géographique
                   </label>
                   <input
+                    id="finess-geographique"
                     type="text"
                     name="finessGeographique"
                     value={formData.finessGeographique}
@@ -536,10 +544,11 @@ const MailboxCreate = () => {
           {formData.type === 'applicative' && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="app-name" className="block text-sm font-medium text-gray-700 mb-1">
                   Nom de l'application <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="application-name"
                   type="text"
                   name="applicationName"
                   value={formData.applicationName}
@@ -554,8 +563,9 @@ const MailboxCreate = () => {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label htmlFor="app-description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
+                  id="application-description"
                   name="applicationDescription"
                   value={formData.applicationDescription}
                   onChange={handleChange}
@@ -579,10 +589,11 @@ const MailboxCreate = () => {
           <h2 className="text-lg font-semibold mb-4">Options</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="quota-gb" className="block text-sm font-medium text-gray-700 mb-1">
                 Quota de stockage
               </label>
               <select
+                id="quota-gb"
                 name="quotaMb"
                 value={formData.quotaMb}
                 onChange={handleChange}
@@ -626,10 +637,11 @@ const MailboxCreate = () => {
 
             {formData.autoReply && (
               <div className="ml-6">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="auto-reply-msg" className="block text-sm font-medium text-gray-700 mb-1">
                   Message de réponse automatique
                 </label>
                 <textarea
+                  id="auto-reply-msg"
                   name="autoReplyMessage"
                   value={formData.autoReplyMessage}
                   onChange={handleChange}

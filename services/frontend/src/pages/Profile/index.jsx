@@ -123,8 +123,9 @@ const Profile = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+              <label htmlFor="first-name" className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
               <input
+                id="first-name"
                 type="text"
                 name="first_name"
                 value={formData.first_name}
@@ -133,8 +134,9 @@ const Profile = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+              <label htmlFor="last-name" className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
               <input
+                id="last-name"
                 type="text"
                 name="last_name"
                 value={formData.last_name}
@@ -145,8 +147,9 @@ const Profile = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
             <input
+              id="phone"
               type="tel"
               name="phone"
               value={formData.phone}

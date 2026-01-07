@@ -93,8 +93,11 @@ const MonthlyIndicators = () => {
       {/* Sélecteur de période */}
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Période :</label>
+          <label htmlFor="month-select" className="text-sm font-medium text-gray-700">
+            Période :
+          </label>
           <input
+            id="month-select"
             type="month"
             value={selectedMonth}
             onChange={e => setSelectedMonth(e.target.value)}

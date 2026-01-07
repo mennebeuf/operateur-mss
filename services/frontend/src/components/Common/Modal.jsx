@@ -56,15 +56,19 @@ const Modal = ({
   const sizeClasses = sizes[size] || sizes.md;
 
   const modalContent = (
+    // Correction: ajout de role="presentation" pour l'overlay
+    // L'overlay n'est pas interactif au sens strict, il délègue au bouton de fermeture
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
       onClick={handleOverlayClick}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
+      role="presentation"
     >
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
       <div
         className={`bg-white rounded-xl shadow-2xl w-full ${sizeClasses} transform transition-all animate-scaleIn ${className}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
