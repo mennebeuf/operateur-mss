@@ -39,5 +39,6 @@
   "terminal.integrated.defaultProfile.linux": "bash",
   "docker.containers.label": "ContainerName",
   "docker.containers.groupBy": "Compose Project Name",
-  "containers.containers.groupBy": "Compose Project Name"
+  "containers.containers.groupBy": "Compose Project Name",
+  "containers.containers.label": "ContainerName"
 }

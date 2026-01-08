@@ -1,0 +1,10 @@
+# =============================================================================
+# Configuration PostgreSQL pour les boîtes aux lettres virtuelles Postfix
+# =============================================================================
+
+user = {{POSTGRES_USER}}
+password = {{POSTGRES_PASSWORD}}
+hosts = {{POSTGRES_HOST}}
+dbname = {{POSTGRES_DB}}
+
+query = SELECT CONCAT(domain, '/', local_part, '/') FROM mailboxes WHERE email='%s' AND status='active'

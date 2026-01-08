@@ -1,0 +1,10 @@
+# =============================================================================
+# Configuration PostgreSQL pour les domaines virtuels Postfix
+# =============================================================================
+
+user = {{POSTGRES_USER}}
+password = {{POSTGRES_PASSWORD}}
+hosts = {{POSTGRES_HOST}}
+dbname = {{POSTGRES_DB}}
+
+query = SELECT domain FROM domains WHERE domain='%s' AND status='active'

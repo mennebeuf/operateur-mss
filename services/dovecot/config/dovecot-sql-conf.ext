@@ -1,0 +1,24 @@
+# =============================================================================
+# Configuration SQL Dovecot pour PostgreSQL
+# =============================================================================
+
+driver = pgsql
+connect = host={{POSTGRES_HOST}} dbname={{POSTGRES_DB}} user={{POSTGRES_USER}} password={{POSTGRES_PASSWORD}}
+
+default_pass_scheme = BLF-CRYPT
+
+# Requête de mot de passe
+password_query = SELECT email as user, password, \
+    '/var/mail/vhosts/%d/%n' as userdb_home, \
+    'maildir:/var/mail/vhosts/%d/%n' as userdb_mail, \
+    5000 as userdb_uid, 5000 as userdb_gid \
+    FROM mailboxes WHERE email = '%u' AND status = 'active'
+
+# Requête utilisateur
+user_query = SELECT '/var/mail/vhosts/%d/%n' as home, \
+    'maildir:/var/mail/vhosts/%d/%n' as mail, \
+    5000 AS uid, 5000 AS gid \
+    FROM mailboxes WHERE email = '%u' AND status = 'active'
+
+# Requête d'itération (pour doveadm)
+iterate_query = SELECT email AS user FROM mailboxes WHERE status = 'active'

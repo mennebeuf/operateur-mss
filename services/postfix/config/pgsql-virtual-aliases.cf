@@ -1,0 +1,10 @@
+# =============================================================================
+# Configuration PostgreSQL pour les alias virtuels Postfix
+# =============================================================================
+
+user = {{POSTGRES_USER}}
+password = {{POSTGRES_PASSWORD}}
+hosts = {{POSTGRES_HOST}}
+dbname = {{POSTGRES_DB}}
+
+query = SELECT destination FROM aliases WHERE source='%s' AND status='active'
