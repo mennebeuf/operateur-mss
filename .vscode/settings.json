@@ -11,8 +11,8 @@
   "files.exclude": {
     "**/node_modules": true,
     "**/.DS_Store": true,
-    "**/data": true,
-    "**/.env": true
+    // "**/data": true,
+    // "**/.env": true
   },
   "search.exclude": {
     "**/node_modules": true,
@@ -40,5 +40,8 @@
   "docker.containers.label": "ContainerName",
   "docker.containers.groupBy": "Compose Project Name",
   "containers.containers.groupBy": "Compose Project Name",
-  "containers.containers.label": "ContainerName"
+  "containers.containers.label": "ContainerName",
+  "cSpell.words": [
+    "mssante"
+  ]
 }
