@@ -1,0 +1,263 @@
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # Reverse Proxy & Load Balancer
+  # ==========================================================================
+  traefik:
+    image: traefik:v2.10
+    container_name: mssante-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./config/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./config/certificates:/certificates:ro
+      - ./data/logs/traefik:/logs
+    networks:
+      - mssante-network
+    labels:
+      - "traefik.enable=true"
+
+  # ==========================================================================
+  # Base de données PostgreSQL
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: mssante-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mssante}
+      POSTGRES_USER: ${POSTGRES_USER:-mssante}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mssante_dev_password}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    networks:
+      - mssante-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mssante}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================================================
+  # Cache Redis
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: mssante-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes ${REDIS_PASSWORD:+--requirepass ${REDIS_PASSWORD}}
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - mssante-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================================================
+  # API Backend (Node.js)
+  # ==========================================================================
+  api:
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    container_name: mssante-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-mssante}
+      DB_USER: ${POSTGRES_USER:-mssante}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-mssante_dev_password}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      # Security
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production}
+      # Pro Santé Connect
+      PSC_CLIENT_ID: ${PSC_CLIENT_ID:-}
+      PSC_CLIENT_SECRET: ${PSC_CLIENT_SECRET:-}
+      # Domain
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./services/api:/app
+      - /app/node_modules
+      - ./data/logs/api:/app/logs
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mssante-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`api.${DOMAIN:-localhost}`) || PathPrefix(`/api`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+
+  # ==========================================================================
+  # Frontend (React)
+  # ==========================================================================
+  frontend:
+    build:
+      context: ./services/frontend
+      dockerfile: Dockerfile
+    container_name: mssante-frontend
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: ${API_URL:-http://localhost:3000}
+      REACT_APP_PSC_CLIENT_ID: ${PSC_CLIENT_ID:-}
+    volumes:
+      - ./services/frontend:/app
+      - /app/node_modules
+    ports:
+      - "3001:80"
+    depends_on:
+      - api
+    networks:
+      - mssante-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+  # ==========================================================================
+  # Serveur SMTP (Postfix)
+  # ==========================================================================
+  postfix:
+    build:
+      context: ./services/postfix
+      dockerfile: Dockerfile
+    container_name: mssante-postfix
+    restart: unless-stopped
+    hostname: mail.${DOMAIN:-localhost}
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-mssante}
+      POSTGRES_USER: ${POSTGRES_USER:-mssante}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mssante_dev_password}
+    volumes:
+      - ./data/mail:/var/mail
+      - ./config/certificates/server:/etc/ssl/certs/mssante:ro
+      - ./config/certificates/igc-sante:/etc/ssl/igc-sante:ro
+      - ./data/logs/postfix:/var/log/postfix
+      - ./services/postfix/config:/etc/postfix/custom:ro
+    ports:
+      - "25:25"
+      - "587:587"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mssante-network
+
+  # ==========================================================================
+  # Serveur IMAP (Dovecot)
+  # ==========================================================================
+  dovecot:
+    build:
+      context: ./services/dovecot
+      dockerfile: Dockerfile
+    container_name: mssante-dovecot
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-mssante}
+      POSTGRES_USER: ${POSTGRES_USER:-mssante}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mssante_dev_password}
+    volumes:
+      - ./data/mail:/var/mail
+      - ./config/certificates/server:/etc/ssl/certs/mssante:ro
+      - ./config/certificates/igc-sante:/etc/ssl/igc-sante:ro
+      - ./data/logs/dovecot:/var/log/dovecot
+      - ./services/dovecot/config:/etc/dovecot/custom:ro
+    ports:
+      - "143:143"
+      - "993:993"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - mssante-network
+
+  # ==========================================================================
+  # Monitoring - Prometheus (optionnel)
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: mssante-prometheus
+    restart: unless-stopped
+    profiles:
+      - monitoring
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./data/prometheus:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - mssante-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+
+  # ==========================================================================
+  # Monitoring - Grafana (optionnel)
+  # ==========================================================================
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: mssante-grafana
+    restart: unless-stopped
+    profiles:
+      - monitoring
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    ports:
+      - "3002:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - mssante-network
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  mssante-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# =============================================================================
+# Volumes (optionnel - pour persistance nommée)
+# =============================================================================
+volumes:
+  postgres_data:
+  redis_data:
+  mail_data:
