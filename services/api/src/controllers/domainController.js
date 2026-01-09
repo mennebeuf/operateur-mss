@@ -692,6 +692,543 @@ const getStatistics = async (req, res) => {
   }
 };
 
+// Ajoutez ces fonctions à la fin de services/api/src/controllers/domainController.js
+// (juste avant le module.exports)
+
+/**
+ * POST /api/v1/domains/:id/suspend
+ * Suspendre un domaine
+ */
+const suspend = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    // Vérifier que le domaine existe
+    const domainResult = await client.query(
+      'SELECT * FROM domains WHERE id = $1',
+      [id]
+    );
+
+    if (domainResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Domaine non trouvé',
+        code: 'DOMAIN_NOT_FOUND'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Suspendre le domaine
+    await client.query(
+      `UPDATE domains 
+       SET status = 'suspended',
+           suspension_reason = $1,
+           suspended_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $2`,
+      [reason, id]
+    );
+
+    // Suspendre toutes les BAL du domaine
+    await client.query(
+      `UPDATE mailboxes 
+       SET status = 'suspended'
+       WHERE domain_id = $1 AND status = 'active'`,
+      [id]
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, ip_address)
+       VALUES ($1, 'suspend', 'domain', $2, $3, $4)`,
+      [req.user.userId, id, JSON.stringify({ reason }), req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    // Invalider le cache
+    await redisClient.del(`domain:${id}`);
+
+    logger.info(`Domaine suspendu: ${id}`);
+
+    res.json({
+      success: true,
+      message: 'Domaine suspendu avec succès'
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur suspend domain:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur suspension domaine'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * POST /api/v1/domains/:id/activate
+ * Activer un domaine
+ */
+const activate = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+
+    // Vérifier que le domaine existe
+    const domainResult = await client.query(
+      'SELECT * FROM domains WHERE id = $1',
+      [id]
+    );
+
+    if (domainResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Domaine non trouvé',
+        code: 'DOMAIN_NOT_FOUND'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Activer le domaine
+    await client.query(
+      `UPDATE domains 
+       SET status = 'active',
+           suspension_reason = NULL,
+           suspended_at = NULL,
+           updated_at = NOW()
+       WHERE id = $1`,
+      [id]
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, ip_address)
+       VALUES ($1, 'activate', 'domain', $2, $3)`,
+      [req.user.userId, id, req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    // Invalider le cache
+    await redisClient.del(`domain:${id}`);
+
+    logger.info(`Domaine activé: ${id}`);
+
+    res.json({
+      success: true,
+      message: 'Domaine activé avec succès'
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur activate domain:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur activation domaine'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * GET /api/v1/domains/:id/usage
+ * Utilisation des ressources du domaine
+ */
+const getUsage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Vérifier que le domaine existe
+    const domainResult = await pool.query(
+      'SELECT * FROM domains WHERE id = $1',
+      [id]
+    );
+
+    if (domainResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Domaine non trouvé',
+        code: 'DOMAIN_NOT_FOUND'
+      });
+    }
+
+    const domain = domainResult.rows[0];
+
+    // Récupérer l'utilisation actuelle
+    const usageResult = await pool.query(
+      `SELECT 
+         COUNT(*) FILTER (WHERE status = 'active') as active_mailboxes,
+         COUNT(*) as total_mailboxes,
+         COALESCE(SUM(used_mb), 0) as total_used_mb,
+         COALESCE(SUM(quota_mb), 0) as total_quota_mb
+       FROM mailboxes
+       WHERE domain_id = $1`,
+      [id]
+    );
+
+    const userCount = await pool.query(
+      `SELECT COUNT(*) as count FROM users WHERE domain_id = $1 AND status = 'active'`,
+      [id]
+    );
+
+    const usage = usageResult.rows[0];
+
+    // Calculer les quotas (convertir GB en MB pour la comparaison)
+    const maxMailboxes = domain.max_mailboxes || 1000;
+    const maxStorageMb = (domain.max_storage_gb || 100) * 1024;
+
+    res.json({
+      success: true,
+      data: {
+        mailboxes: {
+          active: parseInt(usage.active_mailboxes),
+          total: parseInt(usage.total_mailboxes),
+          max: maxMailboxes,
+          percentUsed: Math.round((parseInt(usage.active_mailboxes) / maxMailboxes) * 100),
+          available: maxMailboxes - parseInt(usage.active_mailboxes)
+        },
+        storage: {
+          usedMb: parseInt(usage.total_used_mb),
+          totalMb: parseInt(usage.total_quota_mb),
+          maxMb: maxStorageMb,
+          percentUsed: Math.round((parseInt(usage.total_used_mb) / maxStorageMb) * 100),
+          availableMb: maxStorageMb - parseInt(usage.total_used_mb),
+          usedGb: Math.round(parseInt(usage.total_used_mb) / 1024 * 100) / 100,
+          maxGb: domain.max_storage_gb || 100
+        },
+        users: {
+          active: parseInt(userCount.rows[0].count),
+          max: domain.max_users || 500
+        }
+      }
+    });
+
+  } catch (error) {
+    logger.error('Erreur get usage:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération utilisation'
+    });
+  }
+};
+
+/**
+ * PUT /api/v1/domains/:id/quotas
+ * Mettre à jour les quotas d'un domaine
+ */
+const updateQuotas = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const { maxMailboxes, maxStorageGb, maxUsersPerMailbox } = req.body;
+
+    // Vérifier que le domaine existe
+    const domainResult = await client.query(
+      'SELECT * FROM domains WHERE id = $1',
+      [id]
+    );
+
+    if (domainResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Domaine non trouvé',
+        code: 'DOMAIN_NOT_FOUND'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Construire la requête de mise à jour
+    const updates = [];
+    const values = [];
+    let paramIndex = 1;
+
+    if (maxMailboxes !== undefined) {
+      updates.push(`max_mailboxes = $${paramIndex++}`);
+      values.push(maxMailboxes);
+    }
+
+    if (maxStorageGb !== undefined) {
+      updates.push(`max_storage_gb = $${paramIndex++}`);
+      values.push(maxStorageGb);
+    }
+
+    if (maxUsersPerMailbox !== undefined) {
+      updates.push(`max_users_per_mailbox = $${paramIndex++}`);
+      values.push(maxUsersPerMailbox);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Aucune modification fournie'
+      });
+    }
+
+    updates.push(`updated_at = NOW()`);
+    values.push(id);
+
+    const result = await client.query(
+      `UPDATE domains SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+      values
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, ip_address)
+       VALUES ($1, 'update_quotas', 'domain', $2, $3, $4)`,
+      [req.user.userId, id, JSON.stringify(req.body), req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    // Invalider le cache
+    await redisClient.del(`domain:${id}`);
+
+    logger.info(`Quotas mis à jour pour domaine: ${id}`);
+
+    const domain = result.rows[0];
+
+    res.json({
+      success: true,
+      message: 'Quotas mis à jour avec succès',
+      data: {
+        maxMailboxes: domain.max_mailboxes,
+        maxStorageGb: domain.max_storage_gb,
+        maxUsersPerMailbox: domain.max_users_per_mailbox
+      }
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur update quotas:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur mise à jour quotas'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * GET /api/v1/domains/:id/certificates
+ * Liste des certificats du domaine
+ */
+const getCertificates = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Vérifier que le domaine existe
+    const domainResult = await pool.query(
+      'SELECT domain_name FROM domains WHERE id = $1',
+      [id]
+    );
+
+    if (domainResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Domaine non trouvé',
+        code: 'DOMAIN_NOT_FOUND'
+      });
+    }
+
+    // Récupérer les certificats
+    const result = await pool.query(
+      `SELECT id, type, serial_number, subject, issuer, 
+              valid_from, valid_to, status, created_at
+       FROM certificates
+       WHERE domain_id = $1
+       ORDER BY created_at DESC`,
+      [id]
+    );
+
+    res.json({
+      success: true,
+      data: result.rows.map(row => ({
+        id: row.id,
+        type: row.type,
+        serialNumber: row.serial_number,
+        subject: row.subject,
+        issuer: row.issuer,
+        validFrom: row.valid_from,
+        validTo: row.valid_to,
+        status: row.status,
+        createdAt: row.created_at,
+        daysUntilExpiry: Math.ceil((new Date(row.valid_to) - new Date()) / (1000 * 60 * 60 * 24))
+      }))
+    });
+
+  } catch (error) {
+    logger.error('Erreur get certificates:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération certificats'
+    });
+  }
+};
+
+/**
+ * GET /api/v1/domains/:id/users
+ * Liste des utilisateurs du domaine
+ */
+const getUsers = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    // Vérifier que le domaine existe
+    const domainResult = await pool.query(
+      'SELECT id FROM domains WHERE id = $1',
+      [id]
+    );
+
+    if (domainResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Domaine non trouvé',
+        code: 'DOMAIN_NOT_FOUND'
+      });
+    }
+
+    // Comptage total
+    const countResult = await pool.query(
+      'SELECT COUNT(*) as total FROM users WHERE domain_id = $1',
+      [id]
+    );
+    const total = parseInt(countResult.rows[0].total);
+
+    // Récupération paginée
+    const result = await pool.query(
+      `SELECT u.id, u.email, u.first_name, u.last_name, u.rpps_id, u.status,
+              u.last_login, u.created_at, r.name as role_name
+       FROM users u
+       LEFT JOIN roles r ON u.role_id = r.id
+       WHERE u.domain_id = $1
+       ORDER BY u.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [id, limit, offset]
+    );
+
+    res.json({
+      success: true,
+      data: result.rows.map(row => ({
+        id: row.id,
+        email: row.email,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        rppsId: row.rpps_id,
+        status: row.status,
+        role: row.role_name,
+        lastLogin: row.last_login,
+        createdAt: row.created_at
+      })),
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (error) {
+    logger.error('Erreur get users:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération utilisateurs'
+    });
+  }
+};
+
+/**
+ * GET /api/v1/domains/:id/mailboxes
+ * Liste des BAL du domaine
+ */
+const getMailboxes = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    // Vérifier que le domaine existe
+    const domainResult = await pool.query(
+      'SELECT id FROM domains WHERE id = $1',
+      [id]
+    );
+
+    if (domainResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Domaine non trouvé',
+        code: 'DOMAIN_NOT_FOUND'
+      });
+    }
+
+    // Comptage total
+    const countResult = await pool.query(
+      'SELECT COUNT(*) as total FROM mailboxes WHERE domain_id = $1',
+      [id]
+    );
+    const total = parseInt(countResult.rows[0].total);
+
+    // Récupération paginée
+    const result = await pool.query(
+      `SELECT m.id, m.email, m.type, m.display_name, m.status, m.quota_mb, m.used_mb,
+              m.created_at, m.last_activity, u.email as owner_email
+       FROM mailboxes m
+       LEFT JOIN users u ON m.owner_id = u.id
+       WHERE m.domain_id = $1
+       ORDER BY m.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [id, limit, offset]
+    );
+
+    res.json({
+      success: true,
+      data: result.rows.map(row => ({
+        id: row.id,
+        email: row.email,
+        type: row.type,
+        displayName: row.display_name,
+        status: row.status,
+        quota: {
+          totalMb: row.quota_mb,
+          usedMb: row.used_mb,
+          percentUsed: Math.round((row.used_mb / row.quota_mb) * 100)
+        },
+        ownerEmail: row.owner_email,
+        createdAt: row.created_at,
+        lastActivity: row.last_activity
+      })),
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (error) {
+    logger.error('Erreur get mailboxes:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération boîtes aux lettres'
+    });
+  }
+};
+
 /**
  * GET /api/v1/domains/:id/dns-records
  * Récupérer les enregistrements DNS requis
@@ -713,13 +1250,48 @@ const getDnsRecords = async (req, res) => {
     }
 
     const domainName = domainResult.rows[0].domain_name;
-    const dnsRecords = dnsService.generateRequiredRecords(domainName);
+
+    // Générer les enregistrements DNS requis
+    const records = [
+      {
+        type: 'MX',
+        name: '@',
+        value: `10 mail.${domainName}.`,
+        ttl: 3600,
+        priority: 10
+      },
+      {
+        type: 'MX',
+        name: '@',
+        value: `20 mail2.${domainName}.`,
+        ttl: 3600,
+        priority: 20
+      },
+      {
+        type: 'TXT',
+        name: '@',
+        value: `v=spf1 mx -all`,
+        ttl: 3600
+      },
+      {
+        type: 'TXT',
+        name: '_dmarc',
+        value: `v=DMARC1; p=quarantine; rua=mailto:dmarc@${domainName}`,
+        ttl: 3600
+      },
+      {
+        type: 'CNAME',
+        name: 'mail',
+        value: `smtp.mssante.fr.`,
+        ttl: 3600
+      }
+    ];
 
     res.json({
       success: true,
       data: {
         domainName,
-        records: dnsRecords
+        records
       }
     });
 
@@ -732,13 +1304,21 @@ const getDnsRecords = async (req, res) => {
   }
 };
 
+// Mettez à jour le module.exports pour inclure toutes les fonctions :
 module.exports = {
   list,
   get,
   create,
   update,
-  remove,
-  verifyDns,
+  delete: remove,  // Alias car 'delete' est un mot réservé
+  suspend,
+  activate,
   getStatistics,
-  getDnsRecords
+  getUsage,
+  updateQuotas,
+  getCertificates,
+  getUsers,
+  getMailboxes,
+  getDnsRecords,
+  verifyDns
 };

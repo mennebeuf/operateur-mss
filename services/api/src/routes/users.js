@@ -121,7 +121,7 @@ router.delete('/:id',
     param('id').isUUID().withMessage('ID utilisateur invalide')
   ],
   validate,
-  userController.delete
+  userController.remove
 );
 
 /**

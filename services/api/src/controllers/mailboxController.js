@@ -1,7 +1,7 @@
 // services/api/src/controllers/mailboxController.js
 const { pool } = require('../config/database');
 const { redisClient } = require('../config/redis');
-const annuaireService = require('../services/annuaire');
+const annuaireService = require('../services/annuaireService');
 const mailService = require('../services/mailService');
 const logger = require('../utils/logger');
 
@@ -841,14 +841,503 @@ const getStats = async (req, res) => {
   }
 };
 
+// Ajoutez ces fonctions à la fin de services/api/src/controllers/mailboxController.js
+// (juste avant le module.exports)
+
+/**
+ * POST /api/v1/mailboxes/:id/suspend
+ * Suspendre une BAL
+ */
+const suspend = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Vérifier que la BAL existe
+    const mailboxResult = await client.query(
+      'SELECT * FROM mailboxes WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (mailboxResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'BAL non trouvée',
+        code: 'MAILBOX_NOT_FOUND'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Suspendre la BAL
+    await client.query(
+      `UPDATE mailboxes 
+       SET status = 'suspended', 
+           suspension_reason = $1,
+           suspended_at = NOW(),
+           updated_at = NOW() 
+       WHERE id = $2`,
+      [reason, id]
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, ip_address)
+       VALUES ($1, 'suspend', 'mailbox', $2, $3, $4)`,
+      [req.user.userId, id, JSON.stringify({ reason }), req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    // Invalider le cache
+    await redisClient.del(`domain_mailboxes:${domainId}`);
+    await redisClient.del(`mailbox:${id}`);
+
+    logger.info(`BAL suspendue: ${id}`);
+
+    res.json({
+      success: true,
+      message: 'BAL suspendue avec succès'
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur suspend mailbox:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur suspension BAL'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * POST /api/v1/mailboxes/:id/activate
+ * Réactiver une BAL
+ */
+const activate = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Vérifier que la BAL existe
+    const mailboxResult = await client.query(
+      'SELECT * FROM mailboxes WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (mailboxResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'BAL non trouvée',
+        code: 'MAILBOX_NOT_FOUND'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Activer la BAL
+    await client.query(
+      `UPDATE mailboxes 
+       SET status = 'active',
+           suspension_reason = NULL,
+           suspended_at = NULL,
+           updated_at = NOW() 
+       WHERE id = $1`,
+      [id]
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, ip_address)
+       VALUES ($1, 'activate', 'mailbox', $2, $3)`,
+      [req.user.userId, id, req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    // Invalider le cache
+    await redisClient.del(`domain_mailboxes:${domainId}`);
+    await redisClient.del(`mailbox:${id}`);
+
+    logger.info(`BAL activée: ${id}`);
+
+    res.json({
+      success: true,
+      message: 'BAL activée avec succès'
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur activate mailbox:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur activation BAL'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * GET /api/v1/mailboxes/:id/statistics
+ * Statistiques détaillées d'une BAL
+ */
+const getStatistics = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { period = 'month' } = req.query;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Vérifier que la BAL existe
+    const mailboxResult = await pool.query(
+      'SELECT * FROM mailboxes WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (mailboxResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'BAL non trouvée',
+        code: 'MAILBOX_NOT_FOUND'
+      });
+    }
+
+    const mailbox = mailboxResult.rows[0];
+
+    // Déterminer la période
+    let interval = '30 days';
+    if (period === 'day') interval = '1 day';
+    else if (period === 'week') interval = '7 days';
+    else if (period === 'year') interval = '365 days';
+
+    // Statistiques des messages
+    const messagesStats = await pool.query(
+      `SELECT 
+         COUNT(*) FILTER (WHERE direction = 'inbound') as received,
+         COUNT(*) FILTER (WHERE direction = 'outbound') as sent,
+         AVG(size_bytes) FILTER (WHERE direction = 'inbound') as avg_received_size,
+         AVG(size_bytes) FILTER (WHERE direction = 'outbound') as avg_sent_size,
+         SUM(size_bytes) as total_size
+       FROM email_logs
+       WHERE mailbox_id = $1 AND created_at > NOW() - INTERVAL '${interval}'`,
+      [id]
+    );
+
+    // Top expéditeurs
+    const topSenders = await pool.query(
+      `SELECT sender_email, COUNT(*) as count
+       FROM email_logs
+       WHERE mailbox_id = $1 
+         AND direction = 'inbound'
+         AND created_at > NOW() - INTERVAL '${interval}'
+       GROUP BY sender_email
+       ORDER BY count DESC
+       LIMIT 10`,
+      [id]
+    );
+
+    // Top destinataires
+    const topRecipients = await pool.query(
+      `SELECT recipient_email, COUNT(*) as count
+       FROM email_logs
+       WHERE mailbox_id = $1 
+         AND direction = 'outbound'
+         AND created_at > NOW() - INTERVAL '${interval}'
+       GROUP BY recipient_email
+       ORDER BY count DESC
+       LIMIT 10`,
+      [id]
+    );
+
+    const stats = messagesStats.rows[0];
+
+    res.json({
+      success: true,
+      data: {
+        period,
+        quota: {
+          totalMb: mailbox.quota_mb,
+          usedMb: mailbox.used_mb,
+          percentUsed: Math.round((mailbox.used_mb / mailbox.quota_mb) * 100),
+          availableMb: mailbox.quota_mb - mailbox.used_mb
+        },
+        messages: {
+          total: mailbox.message_count,
+          received: parseInt(stats.received) || 0,
+          sent: parseInt(stats.sent) || 0,
+          avgReceivedSizeBytes: Math.round(stats.avg_received_size) || 0,
+          avgSentSizeBytes: Math.round(stats.avg_sent_size) || 0,
+          totalSizeBytes: parseInt(stats.total_size) || 0
+        },
+        topSenders: topSenders.rows.map(row => ({
+          email: row.sender_email,
+          count: parseInt(row.count)
+        })),
+        topRecipients: topRecipients.rows.map(row => ({
+          email: row.recipient_email,
+          count: parseInt(row.count)
+        })),
+        lastActivity: mailbox.last_activity
+      }
+    });
+
+  } catch (error) {
+    logger.error('Erreur get statistics:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération statistiques'
+    });
+  }
+};
+
+/**
+ * GET /api/v1/mailboxes/:id/delegations
+ * Liste des délégations d'une BAL
+ */
+const listDelegations = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Vérifier que la BAL existe
+    const mailboxResult = await pool.query(
+      'SELECT id FROM mailboxes WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (mailboxResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'BAL non trouvée',
+        code: 'MAILBOX_NOT_FOUND'
+      });
+    }
+
+    // Récupérer les délégations
+    const result = await pool.query(
+      `SELECT md.id, md.permissions, md.granted_at, md.expires_at,
+              u.id as user_id, u.email, u.first_name, u.last_name
+       FROM mailbox_delegations md
+       JOIN users u ON md.delegate_id = u.id
+       WHERE md.mailbox_id = $1
+       ORDER BY md.granted_at DESC`,
+      [id]
+    );
+
+    res.json({
+      success: true,
+      data: result.rows.map(row => ({
+        id: row.id,
+        user: {
+          id: row.user_id,
+          email: row.email,
+          firstName: row.first_name,
+          lastName: row.last_name
+        },
+        permissions: row.permissions,
+        grantedAt: row.granted_at,
+        expiresAt: row.expires_at
+      }))
+    });
+
+  } catch (error) {
+    logger.error('Erreur list delegations:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération délégations'
+    });
+  }
+};
+
+/**
+ * POST /api/v1/mailboxes/:id/publish
+ * Publier la BAL dans l'annuaire national
+ */
+const publishToAnnuaire = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Vérifier que la BAL existe
+    const mailboxResult = await client.query(
+      'SELECT * FROM mailboxes WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (mailboxResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'BAL non trouvée',
+        code: 'MAILBOX_NOT_FOUND'
+      });
+    }
+
+    const mailbox = mailboxResult.rows[0];
+
+    // Vérifier que la BAL n'est pas déjà publiée
+    if (mailbox.published_to_annuaire) {
+      return res.status(400).json({
+        success: false,
+        error: 'BAL déjà publiée dans l\'annuaire',
+        code: 'ALREADY_PUBLISHED'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // TODO: Implémenter l'appel à l'API Annuaire ANS
+    // const annuaireResponse = await annuaireService.publishMailbox(mailbox);
+
+    // Simuler un ID annuaire pour le moment
+    const annuaireId = `ANS-${Date.now()}`;
+
+    // Mettre à jour le statut de publication
+    await client.query(
+      `UPDATE mailboxes 
+       SET published_to_annuaire = true,
+           annuaire_id = $1,
+           published_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $2`,
+      [annuaireId, id]
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, ip_address)
+       VALUES ($1, 'publish_annuaire', 'mailbox', $2, $3, $4)`,
+      [req.user.userId, id, JSON.stringify({ annuaireId }), req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    logger.info(`BAL publiée dans l'annuaire: ${mailbox.email}`);
+
+    res.json({
+      success: true,
+      message: 'BAL publiée dans l\'annuaire avec succès',
+      data: {
+        annuaireId,
+        publishedAt: new Date()
+      }
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur publish to annuaire:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur publication annuaire'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * POST /api/v1/mailboxes/:id/unpublish
+ * Dépublier la BAL de l'annuaire national
+ */
+const unpublishFromAnnuaire = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Vérifier que la BAL existe
+    const mailboxResult = await client.query(
+      'SELECT * FROM mailboxes WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (mailboxResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'BAL non trouvée',
+        code: 'MAILBOX_NOT_FOUND'
+      });
+    }
+
+    const mailbox = mailboxResult.rows[0];
+
+    // Vérifier que la BAL est publiée
+    if (!mailbox.published_to_annuaire) {
+      return res.status(400).json({
+        success: false,
+        error: 'BAL non publiée dans l\'annuaire',
+        code: 'NOT_PUBLISHED'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // TODO: Implémenter l'appel à l'API Annuaire ANS
+    // await annuaireService.unpublishMailbox(mailbox.annuaire_id);
+
+    // Mettre à jour le statut de publication
+    await client.query(
+      `UPDATE mailboxes 
+       SET published_to_annuaire = false,
+           annuaire_id = NULL,
+           published_at = NULL,
+           updated_at = NOW()
+       WHERE id = $1`,
+      [id]
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, ip_address)
+       VALUES ($1, 'unpublish_annuaire', 'mailbox', $2, $3)`,
+      [req.user.userId, id, req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    logger.info(`BAL dépubliée de l'annuaire: ${mailbox.email}`);
+
+    res.json({
+      success: true,
+      message: 'BAL dépubliée de l\'annuaire avec succès'
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur unpublish from annuaire:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur dépublication annuaire'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+// Mettez à jour le module.exports pour inclure toutes les fonctions :
 module.exports = {
   list,
   get,
   create,
   update,
-  remove,
-  getDelegations,
+  delete: remove,  // Alias car 'delete' est un mot réservé
+  suspend,
+  activate,
+  getStatistics,
+  getDelegations: listDelegations,  // Alias pour cohérence
+  listDelegations,
   addDelegation,
   removeDelegation,
-  getStats
+  getStats,
+  publishToAnnuaire,
+  unpublishFromAnnuaire
 };

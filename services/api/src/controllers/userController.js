@@ -759,12 +759,233 @@ const search = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/v1/users/:id/activate
+ * Activer un utilisateur
+ */
+const activate = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Vérifier que l'utilisateur existe
+    const existingResult = await client.query(
+      'SELECT * FROM users WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (existingResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Utilisateur non trouvé',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Activer l'utilisateur
+    await client.query(
+      `UPDATE users SET status = 'active', updated_at = NOW() WHERE id = $1`,
+      [id]
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, ip_address)
+       VALUES ($1, 'activate', 'user', $2, $3)`,
+      [req.user.userId, id, req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    // Invalider le cache
+    await redisClient.del(`domain_users:${domainId}`);
+
+    logger.info(`Utilisateur activé: ${id}`);
+
+    res.json({
+      success: true,
+      message: 'Utilisateur activé avec succès'
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur activate user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur activation utilisateur'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * POST /api/v1/users/:id/deactivate
+ * Désactiver un utilisateur
+ */
+const deactivate = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Empêcher l'auto-désactivation
+    if (id === req.user.userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Vous ne pouvez pas vous désactiver vous-même',
+        code: 'SELF_DEACTIVATE'
+      });
+    }
+
+    // Vérifier que l'utilisateur existe
+    const existingResult = await client.query(
+      'SELECT * FROM users WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (existingResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Utilisateur non trouvé',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Désactiver l'utilisateur
+    await client.query(
+      `UPDATE users SET status = 'inactive', updated_at = NOW() WHERE id = $1`,
+      [id]
+    );
+
+    // Log d'audit
+    await client.query(
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, ip_address)
+       VALUES ($1, 'deactivate', 'user', $2, $3)`,
+      [req.user.userId, id, req.ip]
+    );
+
+    await client.query('COMMIT');
+
+    // Invalider les tokens de l'utilisateur
+    await redisClient.del(`refresh_token:${id}`);
+    await redisClient.del(`domain_users:${domainId}`);
+
+    logger.info(`Utilisateur désactivé: ${id}`);
+
+    res.json({
+      success: true,
+      message: 'Utilisateur désactivé avec succès'
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    logger.error('Erreur deactivate user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur désactivation utilisateur'
+    });
+  } finally {
+    client.release();
+  }
+};
+
+/**
+ * GET /api/v1/users/:id/mailboxes
+ * Liste des BAL de l'utilisateur
+ */
+const getMailboxes = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const domainId = req.domain?.id || req.user.domainId;
+
+    // Vérifier que l'utilisateur existe
+    const userResult = await pool.query(
+      'SELECT id FROM users WHERE id = $1 AND domain_id = $2',
+      [id, domainId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Utilisateur non trouvé',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    // Récupérer les BAL où l'utilisateur est propriétaire
+    const mailboxesResult = await pool.query(
+      `SELECT m.id, m.email, m.type, m.display_name, m.status, m.quota_mb, m.used_mb,
+              m.created_at, m.last_activity
+       FROM mailboxes m
+       WHERE m.owner_id = $1 AND m.domain_id = $2
+       ORDER BY m.created_at DESC`,
+      [id, domainId]
+    );
+
+    // Récupérer les délégations
+    const delegationsResult = await pool.query(
+      `SELECT m.id, m.email, m.display_name, md.permissions, md.granted_at
+       FROM mailbox_delegations md
+       JOIN mailboxes m ON md.mailbox_id = m.id
+       WHERE md.delegate_id = $1
+       ORDER BY md.granted_at DESC`,
+      [id]
+    );
+
+    res.json({
+      success: true,
+      data: {
+        owned: mailboxesResult.rows.map(row => ({
+          id: row.id,
+          email: row.email,
+          type: row.type,
+          displayName: row.display_name,
+          status: row.status,
+          quota: {
+            totalMb: row.quota_mb,
+            usedMb: row.used_mb,
+            percentUsed: Math.round((row.used_mb / row.quota_mb) * 100)
+          },
+          createdAt: row.created_at,
+          lastActivity: row.last_activity
+        })),
+        delegated: delegationsResult.rows.map(row => ({
+          id: row.id,
+          email: row.email,
+          displayName: row.display_name,
+          permissions: row.permissions,
+          grantedAt: row.granted_at
+        }))
+      }
+    });
+
+  } catch (error) {
+    logger.error('Erreur get mailboxes:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération boîtes aux lettres'
+    });
+  }
+};
+
+// Mettez à jour le module.exports pour inclure toutes les fonctions :
 module.exports = {
   list,
   get,
   create,
   update,
   remove,
+  activate,
+  deactivate,
+  getMailboxes,
   resetPassword,
   getPermissions,
   search
